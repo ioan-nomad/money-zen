@@ -1,0 +1,21 @@
+[package]
+name = "money-zen"
+version = "0.0.0"
+description = "Modern, fast, and intuitive desktop finance management app"
+authors = ["Ioan"]
+license = "MIT"
+repository = ""
+edition = "2021"
+rust-version = "1.75"
+
+[build-dependencies]
+tauri-build = { version = "2.0", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+tauri = { version = "2.0", features = ["shell-open"] }
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
