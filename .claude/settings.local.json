@@ -1,33 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mkdir:*)",
-      "Bash(touch:*)",
-      "Bash(git init:*)",
-      "Bash(git config:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(rustc --version)",
-      "Bash(cargo --version)",
-      "Bash(node:*)",
-      "Bash(npm:*)",
-      "Bash(git --version)",
-      "Bash(cp:*)",
-      "Bash(cargo install:*)",
-      "Bash(pnpm create:*)",
-      "Bash(pnpm install:*)",
-      "Bash(pnpm add:*)",
-      "Bash(pnpm tauri:*)",
-      "Bash(tasklist)",
-      "Bash(findstr:*)",
-      "Bash(cargo clean:*)",
-      "Bash(curl:*)",
-      "Bash(python3:*)",
-      "Read(//c/Users/ciupe/**)",
-      "Bash(rm:*)",
-      "Bash(netstat:*)",
-      "Bash(taskkill:*)",
-      "Bash(pnpm store prune:*)"
+      "Bash(powershell:*)"
     ],
     "deny": [],
     "ask": []

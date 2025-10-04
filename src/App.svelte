@@ -1,8 +1,10 @@
 <script lang="ts">
   import { invoke } from '@tauri-apps/api/core'
+  import DatabaseTest from './DatabaseTest.svelte'
 
   let greetMsg = ''
   let name = ''
+  let showDatabaseTest = false
 
   async function greet() {
     greetMsg = await invoke('greet', { name })
@@ -13,18 +15,50 @@
   <div class="container">
     <h1>💰 Welcome to MoneyZen</h1>
 
-    <div class="row">
-      <form class="form" on:submit|preventDefault={greet}>
-        <input
-          id="greet-input"
-          placeholder="Enter a name..."
-          bind:value={name}
-        />
-        <button type="submit">Greet</button>
-      </form>
+    <div class="navigation">
+      <button
+        class:active={!showDatabaseTest}
+        on:click={() => showDatabaseTest = false}
+      >
+        Welcome
+      </button>
+      <button
+        class:active={showDatabaseTest}
+        on:click={() => showDatabaseTest = true}
+      >
+        Database Test
+      </button>
     </div>
 
-    <p>{greetMsg}</p>
+    {#if !showDatabaseTest}
+      <div class="welcome">
+        <div class="row">
+          <form class="form" on:submit|preventDefault={greet}>
+            <input
+              id="greet-input"
+              placeholder="Enter a name..."
+              bind:value={name}
+            />
+            <button type="submit">Greet</button>
+          </form>
+        </div>
+
+        <p>{greetMsg}</p>
+
+        <div class="features">
+          <h2>🚀 Phase 1 Features</h2>
+          <ul>
+            <li>✅ SQLite Database Integration</li>
+            <li>✅ Account Management</li>
+            <li>✅ Transaction Tracking</li>
+            <li>✅ Category System</li>
+            <li>⚡ Real-time Balance Updates</li>
+          </ul>
+        </div>
+      </div>
+    {:else}
+      <DatabaseTest />
+    {/if}
   </div>
 </main>
 
@@ -82,5 +116,48 @@
     text-transform: uppercase;
     font-size: 4rem;
     font-weight: 100;
+  }
+
+  .navigation {
+    display: flex;
+    gap: 1rem;
+    margin: 2rem 0;
+    justify-content: center;
+  }
+
+  .navigation button {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #3B82F6;
+    background: white;
+    color: #3B82F6;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.25s;
+  }
+
+  .navigation button.active {
+    background: #3B82F6;
+    color: white;
+  }
+
+  .navigation button:hover {
+    background: #3B82F6;
+    color: white;
+  }
+
+  .features {
+    margin: 2rem 0;
+    text-align: left;
+  }
+
+  .features ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .features li {
+    padding: 0.5rem 0;
+    font-size: 1.1rem;
   }
 </style>
