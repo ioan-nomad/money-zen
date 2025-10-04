@@ -17,7 +17,17 @@
       "Bash(pnpm create:*)",
       "Bash(pnpm install:*)",
       "Bash(pnpm add:*)",
-      "Bash(pnpm tauri:*)"
+      "Bash(pnpm tauri:*)",
+      "Bash(tasklist)",
+      "Bash(findstr:*)",
+      "Bash(cargo clean:*)",
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Read(//c/Users/ciupe/**)",
+      "Bash(rm:*)",
+      "Bash(netstat:*)",
+      "Bash(taskkill:*)",
+      "Bash(pnpm store prune:*)"
     ],
     "deny": [],
     "ask": []
