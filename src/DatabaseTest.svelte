@@ -3,6 +3,7 @@
   import { Database, type Account, type Category, type Transaction } from './lib/database';
   import { formatCurrency, formatDate } from './lib/utils';
   import AccountCard from './lib/components/AccountCard.svelte';
+  import TransactionItem from './lib/components/TransactionItem.svelte';
 
   let dbStatus = 'Checking...';
   let accounts: Account[] = [];
@@ -217,17 +218,7 @@
       
       <div class="space-y-2">
         {#each transactions as transaction}
-          <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
-            <span 
-              class="font-bold text-lg"
-              class:text-success={transaction.transaction_type === 'income'}
-              class:text-error={transaction.transaction_type === 'expense'}
-            >
-              {transaction.transaction_type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
-            </span>
-            <span class="flex-1 px-4">{transaction.description}</span>
-            <span class="text-sm opacity-70">{formatDate(transaction.date)}</span>
-          </div>
+          <TransactionItem {transaction} />
         {/each}
       </div>
     </div>
