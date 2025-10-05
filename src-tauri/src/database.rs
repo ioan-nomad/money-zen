@@ -208,6 +208,47 @@ impl Database {
         Ok(accounts)
     }
 
+    pub async fn update_account(&self, id: String, name: String, account_type: String, currency: String) -> Result<Account, sqlx::Error> {
+        let now = Utc::now().to_rfc3339();
+
+        sqlx::query(
+            "UPDATE accounts SET name = ?, account_type = ?, currency = ?, updated_at = ? WHERE id = ?"
+        )
+        .bind(&name)
+        .bind(&account_type)
+        .bind(&currency)
+        .bind(&now)
+        .bind(&id)
+        .execute(&self.pool)
+        .await?;
+
+        // Return the updated account
+        let row = sqlx::query("SELECT * FROM accounts WHERE id = ?")
+            .bind(&id)
+            .fetch_one(&self.pool)
+            .await?;
+
+        Ok(Account {
+            id: row.get("id"),
+            name: row.get("name"),
+            account_type: row.get("account_type"),
+            balance: row.get("balance"),
+            currency: row.get("currency"),
+            created_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("created_at")).unwrap().with_timezone(&Utc),
+            updated_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("updated_at")).unwrap().with_timezone(&Utc),
+        })
+    }
+
+    pub async fn delete_account(&self, id: String) -> Result<(), sqlx::Error> {
+        // Note: Due to CASCADE constraint, deleting account will also delete all associated transactions
+        sqlx::query("DELETE FROM accounts WHERE id = ?")
+            .bind(&id)
+            .execute(&self.pool)
+            .await?;
+
+        Ok(())
+    }
+
     // Transaction operations
     pub async fn create_transaction(
         &self,

@@ -43,6 +43,26 @@ async fn get_accounts(db: State<'_, DatabaseState>) -> Result<Vec<Account>, Stri
 }
 
 #[tauri::command]
+async fn update_account(
+    db: State<'_, DatabaseState>,
+    id: String,
+    name: String,
+    account_type: String,
+    currency: String,
+) -> Result<Account, String> {
+    let db = db.lock().await;
+    db.update_account(id, name, account_type, currency)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn delete_account(db: State<'_, DatabaseState>, id: String) -> Result<(), String> {
+    let db = db.lock().await;
+    db.delete_account(id).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 async fn create_transaction(
     db: State<'_, DatabaseState>,
     account_id: String,
@@ -101,6 +121,8 @@ async fn main() {
             init_database,
             create_account,
             get_accounts,
+            update_account,
+            delete_account,
             create_transaction,
             get_transactions,
             get_categories
