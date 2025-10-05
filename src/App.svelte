@@ -11,19 +11,23 @@
   }
 </script>
 
-<main>
-  <div class="container">
-    <h1>💰 Welcome to MoneyZen</h1>
+<main class="min-h-screen flex items-center justify-center bg-base-200">
+  <div class="container mx-auto px-4 py-12 text-center">
+    <h1 class="text-6xl font-thin uppercase text-primary mb-8">
+      💰 Welcome to MoneyZen
+    </h1>
 
-    <div class="navigation">
+    <div class="tabs tabs-boxed justify-center mb-8 max-w-md mx-auto">
       <button
-        class:active={!showDatabaseTest}
+        class="tab tab-lg"
+        class:tab-active={!showDatabaseTest}
         on:click={() => showDatabaseTest = false}
       >
         Welcome
       </button>
       <button
-        class:active={showDatabaseTest}
+        class="tab tab-lg"
+        class:tab-active={showDatabaseTest}
         on:click={() => showDatabaseTest = true}
       >
         Database Test
@@ -31,29 +35,35 @@
     </div>
 
     {#if !showDatabaseTest}
-      <div class="welcome">
-        <div class="row">
-          <form class="form" on:submit|preventDefault={greet}>
-            <input
-              id="greet-input"
-              placeholder="Enter a name..."
-              bind:value={name}
-            />
-            <button type="submit">Greet</button>
-          </form>
-        </div>
+      <div class="welcome space-y-6">
+        <form class="flex flex-col gap-2 max-w-xs mx-auto" on:submit|preventDefault={greet}>
+          <input
+            id="greet-input"
+            type="text"
+            placeholder="Enter a name..."
+            class="input input-bordered input-primary w-full"
+            bind:value={name}
+          />
+          <button type="submit" class="btn btn-primary">
+            Greet
+          </button>
+        </form>
 
-        <p>{greetMsg}</p>
+        {#if greetMsg}
+          <p class="text-lg text-base-content">{greetMsg}</p>
+        {/if}
 
-        <div class="features">
-          <h2>🚀 Phase 1 Features</h2>
-          <ul>
-            <li>✅ SQLite Database Integration</li>
-            <li>✅ Account Management</li>
-            <li>✅ Transaction Tracking</li>
-            <li>✅ Category System</li>
-            <li>⚡ Real-time Balance Updates</li>
-          </ul>
+        <div class="card bg-base-100 shadow-xl max-w-md mx-auto mt-8">
+          <div class="card-body text-left">
+            <h2 class="card-title text-2xl mb-4">🚀 Phase 1 Features</h2>
+            <ul class="space-y-2">
+              <li class="text-lg">✅ SQLite Database Integration</li>
+              <li class="text-lg">✅ Account Management</li>
+              <li class="text-lg">✅ Transaction Tracking</li>
+              <li class="text-lg">✅ Category System</li>
+              <li class="text-lg">⚡ Real-time Balance Updates</li>
+            </ul>
+          </div>
         </div>
       </div>
     {:else}
@@ -61,103 +71,3 @@
     {/if}
   </div>
 </main>
-
-<style>
-  .container {
-    margin: 0;
-    padding-top: 10vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    text-align: center;
-  }
-
-  .row {
-    display: flex;
-    justify-content: center;
-  }
-
-  .form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin: 1rem 0;
-  }
-
-  input,
-  button {
-    border-radius: 8px;
-    border: 1px solid transparent;
-    padding: 0.6em 1.2em;
-    font-size: 1em;
-    font-weight: 500;
-    font-family: inherit;
-    color: #0f0f23;
-    background-color: #ffffff;
-    transition: border-color 0.25s;
-    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-  }
-
-  button {
-    cursor: pointer;
-  }
-
-  button:hover {
-    border-color: #396cd8;
-  }
-
-  input,
-  button {
-    outline: none;
-  }
-
-  h1 {
-    color: #ff3e00;
-    text-transform: uppercase;
-    font-size: 4rem;
-    font-weight: 100;
-  }
-
-  .navigation {
-    display: flex;
-    gap: 1rem;
-    margin: 2rem 0;
-    justify-content: center;
-  }
-
-  .navigation button {
-    padding: 0.75rem 1.5rem;
-    border: 2px solid #3B82F6;
-    background: white;
-    color: #3B82F6;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.25s;
-  }
-
-  .navigation button.active {
-    background: #3B82F6;
-    color: white;
-  }
-
-  .navigation button:hover {
-    background: #3B82F6;
-    color: white;
-  }
-
-  .features {
-    margin: 2rem 0;
-    text-align: left;
-  }
-
-  .features ul {
-    list-style: none;
-    padding: 0;
-  }
-
-  .features li {
-    padding: 0.5rem 0;
-    font-size: 1.1rem;
-  }
-</style>

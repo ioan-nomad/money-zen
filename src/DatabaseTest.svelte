@@ -86,225 +86,155 @@
   $: filteredCategories = categories.filter(c => c.category_type === newTransactionType);
 </script>
 
-<div class="database-test">
-  <h2>💾 MoneyZen Database Test</h2>
-
-  <div class="status">
-    <h3>Connection Status: {dbStatus}</h3>
-    {#if error}
-      <div class="error">Error: {error}</div>
-    {/if}
+<div class="max-w-4xl mx-auto p-6 space-y-6">
+  <div class="text-center">
+    <h2 class="text-3xl font-bold mb-2">💾 MoneyZen Database Test</h2>
+    <div class="badge badge-lg badge-primary">{dbStatus}</div>
   </div>
 
-  <div class="section">
-    <h3>📊 Accounts ({accounts.length})</h3>
-    <div class="form">
-      <input
-        bind:value={newAccountName}
-        placeholder="Account name"
-      />
-      <select bind:value={newAccountType}>
-        <option value="checking">Checking</option>
-        <option value="savings">Savings</option>
-        <option value="credit">Credit Card</option>
-        <option value="cash">Cash</option>
-      </select>
-      <button on:click={createAccount} disabled={!newAccountName}>
-        Add Account
-      </button>
+  {#if error}
+    <div class="alert alert-error">
+      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      <span>Error: {error}</span>
     </div>
-    <div class="list">
-      {#each accounts as account}
-        <div class="item">
-          <span class="name">{account.name}</span>
-          <span class="type">({account.account_type})</span>
-          <span class="balance">{formatCurrency(account.balance, account.currency)}</span>
-        </div>
-      {/each}
-    </div>
-  </div>
+  {/if}
 
-  <div class="section">
-    <h3>🏷️ Categories ({categories.length})</h3>
-    <div class="categories">
-      {#each categories as category}
-        <div class="category" style="border-left: 4px solid {category.color}">
-          <span class="icon">{category.icon}</span>
-          <span class="name">{category.name}</span>
-          <span class="type">({category.category_type})</span>
-        </div>
-      {/each}
-    </div>
-  </div>
+  <!-- Accounts Section -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <h3 class="card-title">📊 Accounts ({accounts.length})</h3>
+      
+      <div class="flex flex-wrap gap-2">
+        <input
+          type="text"
+          placeholder="Account name"
+          class="input input-bordered flex-1 min-w-[200px]"
+          bind:value={newAccountName}
+        />
+        <select class="select select-bordered" bind:value={newAccountType}>
+          <option value="checking">Checking</option>
+          <option value="savings">Savings</option>
+          <option value="credit">Credit Card</option>
+          <option value="cash">Cash</option>
+        </select>
+        <button 
+          class="btn btn-primary" 
+          on:click={createAccount} 
+          disabled={!newAccountName}
+        >
+          Add Account
+        </button>
+      </div>
 
-  <div class="section">
-    <h3>💸 Add Transaction</h3>
-    <div class="form">
-      <select bind:value={selectedAccountId}>
+      <div class="space-y-2 mt-4">
         {#each accounts as account}
-          <option value={account.id}>{account.name}</option>
+          <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
+            <div class="flex items-center gap-2">
+              <span class="font-semibold">{account.name}</span>
+              <span class="badge badge-sm badge-ghost">{account.account_type}</span>
+            </div>
+            <span class="font-bold">{formatCurrency(account.balance, account.currency)}</span>
+          </div>
         {/each}
-      </select>
-
-      <select bind:value={newTransactionType} on:change={onTransactionTypeChange}>
-        <option value="expense">Expense</option>
-        <option value="income">Income</option>
-      </select>
-
-      <select bind:value={selectedCategoryId}>
-        {#each filteredCategories as category}
-          <option value={category.id}>{category.icon} {category.name}</option>
-        {/each}
-      </select>
-
-      <input
-        type="number"
-        bind:value={newTransactionAmount}
-        placeholder="Amount"
-        step="0.01"
-      />
-
-      <input
-        bind:value={newTransactionDescription}
-        placeholder="Description"
-      />
-
-      <button
-        on:click={createTransaction}
-        disabled={!selectedAccountId || !selectedCategoryId || newTransactionAmount <= 0}
-      >
-        Add Transaction
-      </button>
+      </div>
     </div>
   </div>
 
-  <div class="section">
-    <h3>📋 Transactions ({transactions.length})</h3>
-    <div class="transactions">
-      {#each transactions as transaction}
-        <div class="transaction">
-          <span class="amount" class:income={transaction.transaction_type === 'income'}>
-            {transaction.transaction_type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
-          </span>
-          <span class="description">{transaction.description}</span>
-          <span class="date">{formatDate(transaction.date)}</span>
-        </div>
-      {/each}
+  <!-- Categories Section -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <h3 class="card-title">🏷️ Categories ({categories.length})</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        {#each categories as category}
+          <div 
+            class="flex items-center gap-3 p-3 bg-base-200 rounded-lg border-l-4"
+            style="border-left-color: {category.color}"
+          >
+            <span class="text-2xl">{category.icon}</span>
+            <div class="flex-1">
+              <span class="font-semibold">{category.name}</span>
+              <span class="badge badge-xs badge-ghost ml-2">{category.category_type}</span>
+            </div>
+          </div>
+        {/each}
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Transaction Section -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <h3 class="card-title">💸 Add Transaction</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <select class="select select-bordered" bind:value={selectedAccountId}>
+          {#each accounts as account}
+            <option value={account.id}>{account.name}</option>
+          {/each}
+        </select>
+
+        <select 
+          class="select select-bordered" 
+          bind:value={newTransactionType} 
+          on:change={onTransactionTypeChange}
+        >
+          <option value="expense">Expense</option>
+          <option value="income">Income</option>
+        </select>
+
+        <select class="select select-bordered md:col-span-2" bind:value={selectedCategoryId}>
+          {#each filteredCategories as category}
+            <option value={category.id}>{category.icon} {category.name}</option>
+          {/each}
+        </select>
+
+        <input
+          type="number"
+          placeholder="Amount"
+          step="0.01"
+          class="input input-bordered"
+          bind:value={newTransactionAmount}
+        />
+
+        <input
+          type="text"
+          placeholder="Description"
+          class="input input-bordered"
+          bind:value={newTransactionDescription}
+        />
+
+        <button
+          class="btn btn-primary md:col-span-2"
+          on:click={createTransaction}
+          disabled={!selectedAccountId || !selectedCategoryId || newTransactionAmount <= 0}
+        >
+          Add Transaction
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transactions Section -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <h3 class="card-title">📋 Transactions ({transactions.length})</h3>
+      
+      <div class="space-y-2">
+        {#each transactions as transaction}
+          <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
+            <span 
+              class="font-bold text-lg"
+              class:text-success={transaction.transaction_type === 'income'}
+              class:text-error={transaction.transaction_type === 'expense'}
+            >
+              {transaction.transaction_type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
+            </span>
+            <span class="flex-1 px-4">{transaction.description}</span>
+            <span class="text-sm opacity-70">{formatDate(transaction.date)}</span>
+          </div>
+        {/each}
+      </div>
     </div>
   </div>
 </div>
-
-<style>
-  .database-test {
-    padding: 1rem;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-
-  .status h3 {
-    color: #333;
-  }
-
-  .error {
-    color: red;
-    background: #fee;
-    padding: 0.5rem;
-    border-radius: 4px;
-    margin: 0.5rem 0;
-  }
-
-  .section {
-    margin: 2rem 0;
-    padding: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-  }
-
-  .form {
-    display: flex;
-    gap: 0.5rem;
-    margin: 1rem 0;
-    flex-wrap: wrap;
-  }
-
-  .form input, .form select, .form button {
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-
-  .form button {
-    background: #3B82F6;
-    color: white;
-    cursor: pointer;
-  }
-
-  .form button:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-  }
-
-  .list, .categories, .transactions {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .item {
-    color: #333;
-  }
-
-  .item .name {
-    color: #1a1a1a;
-  }
-
-  .item .balance {
-    color: #1a1a1a;
-    font-weight: bold;
-  }
-
-  .item, .category, .transaction {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    background: #f9f9f9;
-    border-radius: 4px;
-  }
-
-  .name {
-    font-weight: bold;
-  }
-
-  .type {
-    color: #666;
-    font-size: 0.9em;
-  }
-
-  .balance {
-    margin-left: auto;
-    font-weight: bold;
-  }
-
-  .amount {
-    font-weight: bold;
-    color: #EF4444;
-  }
-
-  .amount.income {
-    color: #22C55E;
-  }
-
-  .description {
-    flex: 1;
-  }
-
-  .date {
-    color: #666;
-    font-size: 0.9em;
-  }
-
-  .icon {
-    font-size: 1.2em;
-  }
-</style>
