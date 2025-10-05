@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { Database, type Account, type Category, type Transaction } from './lib/database';
   import { formatCurrency, formatDate } from './lib/utils';
+  import AccountCard from './lib/components/AccountCard.svelte';
 
   let dbStatus = 'Checking...';
   let accounts: Account[] = [];
@@ -128,13 +129,7 @@
 
       <div class="space-y-2 mt-4">
         {#each accounts as account}
-          <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
-            <div class="flex items-center gap-2">
-              <span class="font-semibold">{account.name}</span>
-              <span class="badge badge-sm badge-ghost">{account.account_type}</span>
-            </div>
-            <span class="font-bold">{formatCurrency(account.balance, account.currency)}</span>
-          </div>
+          <AccountCard {account} />
         {/each}
       </div>
     </div>
