@@ -2,10 +2,11 @@
   import { invoke } from '@tauri-apps/api/core'
   import DatabaseTest from './DatabaseTest.svelte'
   import Dashboard from './lib/Dashboard.svelte'
+  import Transactions from './lib/Transactions.svelte'
 
   let greetMsg = ''
   let name = ''
-  let currentView: 'welcome' | 'dashboard' | 'test' = 'dashboard'
+  let currentView: 'welcome' | 'dashboard' | 'transactions' | 'test' = 'dashboard'
 
   async function greet() {
     greetMsg = await invoke('greet', { name })
@@ -28,6 +29,13 @@
       </button>
       <button
         class="tab tab-lg"
+        class:tab-active={currentView === 'transactions'}
+        on:click={() => currentView = 'transactions'}
+      >
+        Transactions
+      </button>
+      <button
+        class="tab tab-lg"
         class:tab-active={currentView === 'welcome'}
         on:click={() => currentView = 'welcome'}
       >
@@ -44,6 +52,8 @@
 
     {#if currentView === 'dashboard'}
       <Dashboard />
+    {:else if currentView === 'transactions'}
+      <Transactions />
     {:else if currentView === 'welcome'}
       <div class="welcome space-y-6">
         <form class="flex flex-col gap-2 max-w-xs mx-auto" on:submit|preventDefault={greet}>
