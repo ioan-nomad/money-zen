@@ -1,286 +1,103 @@
 # ARCHITECTURE - MoneyZen
-> Technical Architecture & Implementation Details
-> Last Updated: October 5, 2025
+> Last Updated: October 5, 2025 (18:15)
 
-## TECH STACK IMPLEMENTED
+## PHASE 3: PRODUCTION UI - 100% COMPLETE
 
-### Frontend
-- **Framework:** Svelte 4.2.20
-- **Language:** TypeScript 5.9.3
-- **Build Tool:** Vite 5.4.20
-- **Desktop:** Tauri 2.0 (API)
-- **Styling:** TailwindCSS 3.4.18 + DaisyUI 5.1.27
-- **State:** TanStack Query 5.90.2
-- **Validation:** Zod 4.1.11
-- **Utils:** date-fns 4.1.0
+**Latest Commit:** 67927e8
+**Status:** All features implemented and tested
+**Development Time:** ~7 hours (October 5, 2025)
 
-### Backend
-- **Runtime:** Rust (Tauri 2.0)
-- **Database:** SQLite (via SQLx 0.8)
-- **Async Runtime:** Tokio 1.0
-- **Serialization:** Serde + serde_json
+### 3.1 Reusable Components (6 total)
+- AccountCard.svelte (901 bytes)
+- TransactionItem.svelte (768 bytes)
+- CategoryBadge.svelte (515 bytes)
+- AddTransactionForm.svelte (2,483 bytes)
+- TransactionList.svelte (2,447 bytes)
+- AccountList.svelte (1,270 bytes)
 
-### Database Layer
-- **ORM:** SQLx (compile-time checked queries)
-- **Location:** %LOCALAPPDATA%\MoneyZen\money-zen.db
-- **Schema:** 3 tables (accounts, transactions, categories)
-- **Features:** Foreign keys, constraints, auto-balance calculation
+### 3.2 Dashboard Page
+- Dashboard.svelte (2,451 bytes)
+- Two-column layout
+- Total balance calculation
+- Recent transactions (5 most recent)
+- Account overview cards
 
-## PHASE 1: BACKEND CORE ✅ COMPLETE
+### 3.3 Transactions Page
+- Transactions.svelte (866 bytes)
+- TransactionList with 4-way filtering
+- Search by description
+- Filter by account, category, type
+- Empty state handling
 
-### 1.1 Database Integration
-**Status:** 100% Complete
+### 3.4 Accounts Page
+- Accounts.svelte (2,710 bytes)
+- Full CRUD operations
+- Edit modal with form validation
+- Delete confirmation with CASCADE warning
+- AccountList integration
+- Error handling and auto-refresh
 
-**Implementation:**
-- Database path: `AppData\Local\MoneyZen\money-zen.db`
-- Connection pooling via SQLitePool
-- Schema initialization on first run
-- Default categories pre-populated
+### 3.5 Analytics Page
+- Analytics.svelte (4.5K)
+- Summary cards (income, expense, net balance)
+- Top 5 spending categories with progress bars
+- PDF export functionality (jsPDF + autoTable)
+- Real-time calculations from transaction data
 
-**Files:**
-- `src-tauri/src/database.rs` (10,171 bytes)
-- `src-tauri/src/main.rs` (3,330 bytes)
+### 3.6 Navigation System
+- 6-tab navigation (Dashboard, Transactions, Accounts, Analytics, Welcome, Test)
+- Enum-based state management
+- TypeScript type safety
+- Clean conditional rendering
 
-### 1.2 Data Models
-
-**Account Model:**
-```rust
-- id: String (UUID)
-- name: String
-- account_type: String
-- balance: f64 (auto-calculated)
-- currency: String
-- created_at: DateTime<Utc>
-- updated_at: DateTime<Utc>
-```
-
-**Transaction Model:**
-```rust
-- id: String (UUID)
-- account_id: String (FK → accounts)
-- category_id: String (FK → categories)
-- amount: f64
-- description: String
-- transaction_type: String (income/expense)
-- date: DateTime<Utc>
-- created_at: DateTime<Utc>
-- updated_at: DateTime<Utc>
-```
-
-**Category Model:**
-```rust
-- id: String (UUID)
-- name: String
-- color: String (hex)
-- icon: String (emoji)
-- category_type: String (income/expense)
-- created_at: DateTime<Utc>
-```
-
-### 1.3 Tauri Commands Implemented
-
-| Command | Parameters | Returns | Status |
-|---------|------------|---------|--------|
-| init_database | - | Result<(), String> | ✅ |
-| create_account | name, type, currency | Result<Account> | ✅ |
-| get_accounts | - | Result<Vec<Account>> | ✅ |
-| create_transaction | account_id, category_id, amount, desc, type, date | Result<Transaction> | ✅ |
-| get_transactions | - | Result<Vec<Transaction>> | ✅ |
-| get_categories | - | Result<Vec<Category>> | ✅ |
-
-### 1.4 Default Categories
-10 categories pre-populated:
-
-- 🍽️ Food & Dining (expense)
-- 🚗 Transportation (expense)
-- 🏠 Home & Utilities (expense)
-- 🛍️ Shopping (expense)
-- 🎬 Entertainment (expense)
-- 🏥 Healthcare (expense)
-- 💰 Salary (income)
-- 📈 Investment (income)
-- 🎁 Gift (income)
-- 📚 Education (expense)
-
-### 1.5 Features Verified
-
-✅ Database persistence across app restarts
-✅ Multi-account support
-✅ Auto-balance calculation on transactions
-✅ Foreign key constraints enforced
-✅ UUID generation for all entities
-✅ No .unwrap() crashes - proper error handling
-
-## PHASE 2: UI FOUNDATION ✅ COMPLETE
-
-### 2.1 Package Installation ✅
-**Status:** 100% Complete
-
-**Dependencies Installed:**
-- TailwindCSS v3.4.18 (stable version, not v4 alpha)
-- PostCSS + Autoprefixer (build processing)
-- DaisyUI v5.1.27 (component library)
-- Zod v4.1.11 (validation)
-- TanStack Query v5.90.2 (Svelte 4 compatible)
-- date-fns v4.1.0 (date utilities)
-
-### 2.2 Configuration ✅
-**Files Configured:**
-- `tailwind.config.js` - DaisyUI themes, content paths
-- `postcss.config.js` - TailwindCSS processing
-- `src/app.css` - Tailwind directives
-
-### 2.3 UI Refactor ✅
-**App.svelte Changes:**
-- Before: 163 lines (98 lines custom CSS)
-- After: 73 lines (0 lines custom CSS)
-- Converted to DaisyUI tabs, cards, buttons
-- Fully responsive grid layout
-
-**DatabaseTest.svelte Changes:**
-- Before: 310 lines (113 lines custom CSS)
-- After: 220 lines (0 lines custom CSS)
-- All sections now DaisyUI cards
-- Professional form controls
-- Semantic color coding (success/error)
-
-### 2.4 Features Implemented ✅
-- ✅ Consistent dark theme across entire app
-- ✅ Professional component design
-- ✅ Responsive layouts (grid, flexbox)
-- ✅ Accessible form controls
-- ✅ Zero custom CSS (maintainable utility-first)
-- ✅ All functionality preserved
-- ✅ Visual testing complete
-
-## PHASE 3: PRODUCTION UI ⏳ IN PROGRESS
-**Current Status:** 65% (component architecture complete)
-**Implementation:** Reusable components, Dashboard, Transaction Management
-
-### 3.1 Reusable Components ✅
-**Status:** 100% Complete
-
-**Components Implemented:**
-- `AccountCard.svelte` (901 bytes) - Account display with icons & balance colors
-- `TransactionItem.svelte` (768 bytes) - Transaction display with amount, description, date
-- `CategoryBadge.svelte` (515 bytes) - Category display with colored borders & icons
-- `AddTransactionForm.svelte` (2,483 bytes) - Complete transaction form with validation
-- `TransactionList.svelte` (2,447 bytes) - Advanced filtering and transaction display
-
-**Features:**
-- ✅ TypeScript props with proper interfaces
-- ✅ DaisyUI styling with hover effects
-- ✅ Reactive state management
-- ✅ Form validation and error handling
-- ✅ Callback pattern for data submission
-
-### 3.2 Dashboard Implementation ✅
-**Status:** 100% Complete
-
-**Dashboard.svelte** (2,451 bytes)
-- ✅ Two-column layout (accounts + recent transactions)
-- ✅ Total balance calculation (reactive)
-- ✅ Integration with all 5 reusable components
-- ✅ Error handling and data loading
-- ✅ Production-ready with proper TypeScript
-
-### 3.3 Transaction Management ✅
-**Status:** 100% Complete
-
-**TransactionList.svelte Features:**
-- ✅ Advanced filtering (search, account, category, type)
-- ✅ Real-time search by description
-- ✅ Empty state handling
-- ✅ Integrated with TransactionItem component
-
-**Transactions.svelte Page:**
-- ✅ Dedicated Transactions page wrapper
-- ✅ Full-screen transaction management
-- ✅ Integrated with AddTransactionForm
-
-### 3.4 Navigation System ✅
-**Status:** 100% Complete
-
-**App.svelte Updates:**
-- ✅ 4-tab navigation system (Dashboard, Transactions, Welcome, Database Test)
-- ✅ Dashboard as default view
-- ✅ Enum-based state management (`currentView`)
-- ✅ Clean conditional rendering
-
-**Code Refactoring:**
-- ✅ DatabaseTest.svelte: 220→170 lines (using components)
-- ✅ Eliminated duplicate code patterns
-- ✅ Component-based architecture established
-
-### 3.5 Testing & Integration ✅
-- ✅ Build compilation successful (39 modules)
-- ✅ Visual verification complete
-- ✅ All components render correctly
-- ✅ Dev server running successfully
-- ✅ No TypeScript compilation errors
+### 3.7 Backend Integration
+- update_account() - Rust function with TypeScript wrapper
+- delete_account() - CASCADE deletion of transactions
+- All CRUD operations complete
+- Database.updateAccount() and Database.deleteAccount()
 
 ## FILE STRUCTURE (Current)
-```
 money-zen/
-   src/
-      App.svelte (3,062 bytes)
-      DatabaseTest.svelte (7,184 bytes)
-      lib/
-         Dashboard.svelte (2,451 bytes)
-         Transactions.svelte (866 bytes)
-         database.ts (1,737 bytes)
-         utils.ts (966 bytes)
-         components/
-            AccountCard.svelte (901 bytes)
-            TransactionItem.svelte (768 bytes)
-            CategoryBadge.svelte (515 bytes)
-            AddTransactionForm.svelte (2,483 bytes)
-            TransactionList.svelte (2,447 bytes)
-      app.css
-      main.ts
-   src-tauri/
-      src/
-         main.rs (3,330 bytes)
-         database.rs (10,171 bytes)
-      Cargo.toml
-      tauri.conf.json
-   docs/
-      ARCHITECTURE.md (this file)
-      TODO.md
-   package.json
-   tsconfig.json
-   vite.config.ts
-```
+src/
+App.svelte (6-tab navigation)
+DatabaseTest.svelte
+lib/
+Dashboard.svelte (2,451 bytes)
+Transactions.svelte (866 bytes)
+Accounts.svelte (2,710 bytes)
+Analytics.svelte (4.5K)
+database.ts (with update/delete wrappers)
+utils.ts
+components/
+AccountCard.svelte (901 bytes)
+TransactionItem.svelte (768 bytes)
+CategoryBadge.svelte (515 bytes)
+AddTransactionForm.svelte (2,483 bytes)
+TransactionList.svelte (2,447 bytes)
+AccountList.svelte (1,270 bytes)
+src-tauri/
+src/
+main.rs (update_account, delete_account commands)
+database.rs (full CRUD implementation)
+docs/
+ARCHITECTURE.md (this file)
+TODO.md
+package.json (jsPDF 3.0.3, jspdf-autotable 5.0.2)
 
-## NEXT STEPS
+## TECH STACK
+- Frontend: Svelte 4.2.20 + TypeScript
+- Backend: Rust (Tauri 2.0) + SQLite
+- UI: TailwindCSS 3.4.18 + DaisyUI 5.1.27
+- PDF: jsPDF 3.0.3 + autoTable
+- Build: 429 modules, 8.03s
 
-### Phase 3 Remaining (35%)
-1. **AccountList Component** - CRUD operations for accounts
-2. **Analytics Dashboard** - Charts and data visualization
-
-### Phase 4: Import/Export
-1. CSV import/export functionality
-2. PDF statement reader
-3. Report generation
-
-## DECISIONS LOG
-
-**Why SQLx over Drizzle?**
-- Reason: Already had Rust expertise, SQLx provides compile-time query checking
-- Trade-off: Slightly more verbose but type-safe
-- Date: October 4, 2025
-
-**Why UUID over auto-increment IDs?**
-- Reason: Better for distributed systems, avoids collision
-- Trade-off: Slightly larger storage, but negligible for desktop app
-- Date: October 4, 2025
-
-**Why storing dates as RFC3339 strings?**
-- Reason: SQLite doesn't have native datetime type, RFC3339 is ISO standard
-- Trade-off: Must parse on read, but ensures consistency
-- Date: October 4, 2025
+## PHASE 4: IMPORT/EXPORT (Next)
+- XLSX import (bank statements)
+- SQLite backup/restore button
+- Advanced PDF reports
+- Data migration tools
 
 ---
-**Latest Commit:** 4aa3665 (TransactionList component and Transactions page complete)
+**Phase 3 Complete:** October 5, 2025
 **Author:** Ioan + Claude Code
-**Current Phase:** Phase 3 Production UI (65% complete)
+**Next:** Phase 4 planning
