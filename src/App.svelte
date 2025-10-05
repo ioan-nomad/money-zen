@@ -3,10 +3,11 @@
   import DatabaseTest from './DatabaseTest.svelte'
   import Dashboard from './lib/Dashboard.svelte'
   import Transactions from './lib/Transactions.svelte'
+  import Accounts from './lib/Accounts.svelte'
 
   let greetMsg = ''
   let name = ''
-  let currentView: 'welcome' | 'dashboard' | 'transactions' | 'test' = 'dashboard'
+  let currentView: 'welcome' | 'dashboard' | 'transactions' | 'accounts' | 'test' = 'dashboard'
 
   async function greet() {
     greetMsg = await invoke('greet', { name })
@@ -36,6 +37,13 @@
       </button>
       <button
         class="tab tab-lg"
+        class:tab-active={currentView === 'accounts'}
+        on:click={() => currentView = 'accounts'}
+      >
+        Accounts
+      </button>
+      <button
+        class="tab tab-lg"
         class:tab-active={currentView === 'welcome'}
         on:click={() => currentView = 'welcome'}
       >
@@ -54,6 +62,8 @@
       <Dashboard />
     {:else if currentView === 'transactions'}
       <Transactions />
+    {:else if currentView === 'accounts'}
+      <Accounts />
     {:else if currentView === 'welcome'}
       <div class="welcome space-y-6">
         <form class="flex flex-col gap-2 max-w-xs mx-auto" on:submit|preventDefault={greet}>
