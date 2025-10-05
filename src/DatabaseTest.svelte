@@ -5,6 +5,7 @@
   import AccountCard from './lib/components/AccountCard.svelte';
   import TransactionItem from './lib/components/TransactionItem.svelte';
   import CategoryBadge from './lib/components/CategoryBadge.svelte';
+  import AddTransactionForm from './lib/components/AddTransactionForm.svelte';
 
   let dbStatus = 'Checking...';
   let accounts: Account[] = [];
@@ -15,11 +16,6 @@
   // Form states
   let newAccountName = '';
   let newAccountType = 'checking';
-  let newTransactionAmount = 0;
-  let newTransactionDescription = '';
-  let newTransactionType: 'income' | 'expense' = 'expense';
-  let selectedAccountId = '';
-  let selectedCategoryId = '';
 
   onMount(async () => {
     try {
@@ -41,12 +37,6 @@
       categories = await Database.getCategories();
       transactions = await Database.getTransactions();
 
-      if (accounts.length > 0) {
-        selectedAccountId = accounts[0].id;
-      }
-      if (categories.length > 0) {
-        selectedCategoryId = categories.find(c => c.category_type === newTransactionType)?.id || '';
-      }
     } catch (err) {
       error = String(err);
     }
@@ -62,31 +52,27 @@
     }
   }
 
-  async function createTransaction() {
+  async function handleTransactionSubmit(data: {
+    accountId: string;
+    categoryId: string;
+    amount: number;
+    description: string;
+    type: 'income' | 'expense';
+  }) {
     try {
       await Database.createTransaction(
-        selectedAccountId,
-        selectedCategoryId,
-        newTransactionAmount,
-        newTransactionDescription,
-        newTransactionType
+        data.accountId,
+        data.categoryId,
+        data.amount,
+        data.description,
+        data.type
       );
-      newTransactionAmount = 0;
-      newTransactionDescription = '';
       await loadData();
     } catch (err) {
       error = String(err);
     }
   }
 
-  function onTransactionTypeChange() {
-    const filteredCategories = categories.filter(c => c.category_type === newTransactionType);
-    if (filteredCategories.length > 0) {
-      selectedCategoryId = filteredCategories[0].id;
-    }
-  }
-
-  $: filteredCategories = categories.filter(c => c.category_type === newTransactionType);
 </script>
 
 <div class="max-w-4xl mx-auto p-6 space-y-6">
@@ -151,57 +137,7 @@
   </div>
 
   <!-- Add Transaction Section -->
-  <div class="card bg-base-100 shadow-xl">
-    <div class="card-body">
-      <h3 class="card-title">💸 Add Transaction</h3>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <select class="select select-bordered" bind:value={selectedAccountId}>
-          {#each accounts as account}
-            <option value={account.id}>{account.name}</option>
-          {/each}
-        </select>
-
-        <select 
-          class="select select-bordered" 
-          bind:value={newTransactionType} 
-          on:change={onTransactionTypeChange}
-        >
-          <option value="expense">Expense</option>
-          <option value="income">Income</option>
-        </select>
-
-        <select class="select select-bordered md:col-span-2" bind:value={selectedCategoryId}>
-          {#each filteredCategories as category}
-            <option value={category.id}>{category.icon} {category.name}</option>
-          {/each}
-        </select>
-
-        <input
-          type="number"
-          placeholder="Amount"
-          step="0.01"
-          class="input input-bordered"
-          bind:value={newTransactionAmount}
-        />
-
-        <input
-          type="text"
-          placeholder="Description"
-          class="input input-bordered"
-          bind:value={newTransactionDescription}
-        />
-
-        <button
-          class="btn btn-primary md:col-span-2"
-          on:click={createTransaction}
-          disabled={!selectedAccountId || !selectedCategoryId || newTransactionAmount <= 0}
-        >
-          Add Transaction
-        </button>
-      </div>
-    </div>
-  </div>
+  <AddTransactionForm {accounts} {categories} onSubmit={handleTransactionSubmit} />
 
   <!-- Transactions Section -->
   <div class="card bg-base-100 shadow-xl">
