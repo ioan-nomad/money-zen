@@ -1,10 +1,11 @@
 <script lang="ts">
   import { invoke } from '@tauri-apps/api/core'
   import DatabaseTest from './DatabaseTest.svelte'
+  import Dashboard from './lib/Dashboard.svelte'
 
   let greetMsg = ''
   let name = ''
-  let showDatabaseTest = false
+  let currentView: 'welcome' | 'dashboard' | 'test' = 'dashboard'
 
   async function greet() {
     greetMsg = await invoke('greet', { name })
@@ -17,24 +18,33 @@
       💰 Welcome to MoneyZen
     </h1>
 
-    <div class="tabs tabs-boxed justify-center mb-8 max-w-md mx-auto">
+    <div class="tabs tabs-boxed justify-center mb-8 max-w-lg mx-auto">
       <button
         class="tab tab-lg"
-        class:tab-active={!showDatabaseTest}
-        on:click={() => showDatabaseTest = false}
+        class:tab-active={currentView === 'dashboard'}
+        on:click={() => currentView = 'dashboard'}
+      >
+        Dashboard
+      </button>
+      <button
+        class="tab tab-lg"
+        class:tab-active={currentView === 'welcome'}
+        on:click={() => currentView = 'welcome'}
       >
         Welcome
       </button>
       <button
         class="tab tab-lg"
-        class:tab-active={showDatabaseTest}
-        on:click={() => showDatabaseTest = true}
+        class:tab-active={currentView === 'test'}
+        on:click={() => currentView = 'test'}
       >
         Database Test
       </button>
     </div>
 
-    {#if !showDatabaseTest}
+    {#if currentView === 'dashboard'}
+      <Dashboard />
+    {:else if currentView === 'welcome'}
       <div class="welcome space-y-6">
         <form class="flex flex-col gap-2 max-w-xs mx-auto" on:submit|preventDefault={greet}>
           <input
@@ -66,7 +76,7 @@
           </div>
         </div>
       </div>
-    {:else}
+    {:else if currentView === 'test'}
       <DatabaseTest />
     {/if}
   </div>
