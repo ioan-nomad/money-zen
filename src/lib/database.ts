@@ -53,6 +53,24 @@ export class Database {
     return await invoke('get_accounts');
   }
 
+  static async updateAccount(
+    id: string,
+    name: string,
+    accountType: string,
+    currency: string = 'RON'
+  ): Promise<Account> {
+    return await invoke('update_account', {
+      id,
+      name,
+      accountType,
+      currency,
+    });
+  }
+
+  static async deleteAccount(id: string): Promise<void> {
+    await invoke('delete_account', { id });
+  }
+
   // Transaction operations
   static async createTransaction(
     accountId: string,
