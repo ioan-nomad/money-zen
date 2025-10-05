@@ -4,6 +4,7 @@
   import { formatCurrency, formatDate } from './lib/utils';
   import AccountCard from './lib/components/AccountCard.svelte';
   import TransactionItem from './lib/components/TransactionItem.svelte';
+  import CategoryBadge from './lib/components/CategoryBadge.svelte';
 
   let dbStatus = 'Checking...';
   let accounts: Account[] = [];
@@ -143,16 +144,7 @@
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
         {#each categories as category}
-          <div 
-            class="flex items-center gap-3 p-3 bg-base-200 rounded-lg border-l-4"
-            style="border-left-color: {category.color}"
-          >
-            <span class="text-2xl">{category.icon}</span>
-            <div class="flex-1">
-              <span class="font-semibold">{category.name}</span>
-              <span class="badge badge-xs badge-ghost ml-2">{category.category_type}</span>
-            </div>
-          </div>
+          <CategoryBadge {category} />
         {/each}
       </div>
     </div>
