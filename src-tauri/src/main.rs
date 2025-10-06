@@ -63,6 +63,35 @@ async fn delete_account(db: State<'_, DatabaseState>, id: String) -> Result<(), 
 }
 
 #[tauri::command]
+async fn backup_database() -> Result<String, String> {
+    use std::fs;
+    use chrono::Local;
+
+    // Get paths - using the same path logic as main()
+    let home_dir = std::env::var("USERPROFILE").unwrap_or_else(|_| ".".to_string());
+    let app_data_dir = std::path::Path::new(&home_dir).join("AppData").join("Local").join("MoneyZen");
+    let db_path = app_data_dir.join("money-zen.db");
+
+    // Create backup directory in Documents
+    let documents_dir = std::path::Path::new(&home_dir).join("Documents");
+    let backup_dir = documents_dir.join("MoneyZen Backups");
+    fs::create_dir_all(&backup_dir)
+        .map_err(|e| format!("Failed to create backup directory: {}", e))?;
+
+    // Generate timestamped filename
+    let timestamp = Local::now().format("%Y-%m-%d_%H-%M-%S");
+    let backup_filename = format!("backup-{}.db", timestamp);
+    let backup_path = backup_dir.join(&backup_filename);
+
+    // Copy database file
+    fs::copy(&db_path, &backup_path)
+        .map_err(|e| format!("Failed to copy database: {}", e))?;
+
+    // Return success with backup path
+    Ok(format!("Backup created: {}", backup_path.display()))
+}
+
+#[tauri::command]
 async fn create_transaction(
     db: State<'_, DatabaseState>,
     account_id: String,
@@ -123,6 +152,7 @@ async fn main() {
             get_accounts,
             update_account,
             delete_account,
+            backup_database,
             create_transaction,
             get_transactions,
             get_categories

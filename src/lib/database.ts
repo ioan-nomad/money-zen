@@ -71,6 +71,10 @@ export class Database {
     await invoke('delete_account', { id });
   }
 
+  static async backupDatabase(): Promise<string> {
+    return await invoke<string>('backup_database');
+  }
+
   // Transaction operations
   static async createTransaction(
     accountId: string,

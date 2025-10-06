@@ -6,6 +6,7 @@
   import TransactionItem from './lib/components/TransactionItem.svelte';
   import CategoryBadge from './lib/components/CategoryBadge.svelte';
   import AddTransactionForm from './lib/components/AddTransactionForm.svelte';
+  import BackupManager from './lib/components/BackupManager.svelte';
 
   let dbStatus = 'Checking...';
   let accounts: Account[] = [];
@@ -87,6 +88,8 @@
       <span>Error: {error}</span>
     </div>
   {/if}
+
+  <BackupManager />
 
   <!-- Accounts Section -->
   <div class="card bg-base-100 shadow-xl">
