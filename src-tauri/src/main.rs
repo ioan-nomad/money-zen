@@ -8,8 +8,26 @@ use tokio::sync::Mutex;
 use tauri::State;
 use database::{Database, Account, Transaction, Category};
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 
 type DatabaseState = Arc<Mutex<Database>>;
+
+#[derive(Debug, Deserialize, Serialize)]
+struct ImportTransaction {
+    account_id: String,
+    category_id: String,
+    amount: f64,
+    description: String,
+    transaction_type: String,
+    date: String, // ISO format from frontend
+}
+
+#[derive(Debug, Serialize)]
+struct ImportResult {
+    inserted: usize,
+    skipped: usize,
+    errors: Vec<String>,
+}
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -114,6 +132,60 @@ async fn restore_database(backup_path: String) -> Result<String, String> {
 }
 
 #[tauri::command]
+async fn batch_insert_transactions(
+    db: State<'_, DatabaseState>,
+    transactions: Vec<ImportTransaction>,
+) -> Result<ImportResult, String> {
+    let db = db.lock().await;
+    let mut inserted = 0;
+    let mut skipped = 0;
+    let mut errors = Vec::new();
+
+    for tx in transactions {
+        // Parse date
+        let date = match DateTime::parse_from_rfc3339(&tx.date) {
+            Ok(d) => d.with_timezone(&Utc),
+            Err(_) => {
+                errors.push(format!("Invalid date: {}", tx.date));
+                continue;
+            }
+        };
+
+        // Check duplicate (same date, amount, description)
+        match db.transaction_exists(&date.to_rfc3339(), tx.amount, &tx.description).await {
+            Ok(true) => {
+                skipped += 1;
+                continue;
+            }
+            Ok(false) => {
+                // Insert new transaction
+                match db.create_transaction(
+                    tx.account_id,
+                    tx.category_id,
+                    tx.amount,
+                    tx.description,
+                    tx.transaction_type,
+                    date
+                ).await {
+                    Ok(_) => inserted += 1,
+                    Err(e) => errors.push(format!("Failed to insert: {}", e)),
+                }
+            }
+            Err(e) => {
+                errors.push(format!("Database error checking duplicate: {}", e));
+                continue;
+            }
+        }
+    }
+
+    Ok(ImportResult {
+        inserted,
+        skipped,
+        errors,
+    })
+}
+
+#[tauri::command]
 async fn create_transaction(
     db: State<'_, DatabaseState>,
     account_id: String,
@@ -177,6 +249,7 @@ async fn main() {
             delete_account,
             backup_database,
             restore_database,
+            batch_insert_transactions,
             create_transaction,
             get_transactions,
             get_categories

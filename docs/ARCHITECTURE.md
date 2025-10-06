@@ -119,35 +119,56 @@ package.json (jsPDF 3.0.3, jspdf-autotable 5.0.2)
 
 ---
 
-### 4.2 XLSX Import (Priority 2 - 3-4h)
-**What:** Import bank statements from Excel files
-**Why:** Eliminate manual entry - import 500+ transactions in seconds
-**How:** Parse XLSX with SheetJS → map to transactions → batch insert to SQLite
+### 4.2 XLSX Import (Priority 2 - Started)
 
-**Features:**
-- Drag & drop Excel file upload
-- Column mapping UI (user maps bank columns to MoneyZen fields)
-- Auto-categorization based on description keywords
-- Preview before import (show first 10 rows)
-- Duplicate detection (by date + amount + description)
-- Batch insert for performance
+**Status:** In Progress (October 6, 2025)
+**Goal:** Import bank transactions from Excel files
 
-**Tech:**
-- SheetJS (already installed) for XLSX parsing
-- Tauri File API for file reading
-- Custom mapping logic (RON amounts, date formats)
-- SQLite transaction for batch insert
+**What:** Parse Excel files and bulk import transactions
+**Why:** Eliminate manual entry - import hundreds of transactions in seconds
+**How:** SheetJS parsing → column mapping → validation → batch insert
 
-**Data Flow:**
-1. User uploads .xlsx file
-2. SheetJS parses → JavaScript array of objects
-3. Mapping UI: user connects columns (Data → date, Suma → amount, etc.)
-4. Validation: check for required fields, valid amounts, dates
-5. Preview: show 10 sample transactions
-6. Confirm → batch insert to SQLite
-7. Refresh UI → success message
+**User Flow:**
+1. User uploads .xlsx file (drag & drop or file picker)
+2. System parses file and extracts columns
+3. User maps columns: Date → transaction date, Amount → amount, etc.
+4. System validates and shows preview (first 10 rows)
+5. User confirms → batch insert to SQLite
+6. Success message with count (e.g., "Imported 487 transactions")
 
-**Location:** New "Import" tab in navigation
+**Technical Implementation:**
+
+**Backend (Rust):**
+- batch_insert_transactions(transactions: Vec<Transaction>) command
+- SQLite transaction for atomic insert
+- Auto-update account balances
+- Duplicate detection (date + amount + description)
+
+**Frontend (Svelte):**
+- Import.svelte page with file upload
+- SheetJS for parsing Excel files
+- ColumnMapper component for field mapping
+- Preview table showing first 10 rows
+- Validation with error messages
+- Progress indicator during import
+
+**Data Transformations:**
+- Date parsing: DD/MM/YYYY, DD.MM.YYYY, YYYY-MM-DD
+- Amount parsing: "1.234,56", "-500", "500.00"
+- Type detection: negative = expense, positive = income
+- Description cleanup: trim whitespace, normalize encoding
+
+**Edge Cases:**
+- Empty rows → skip
+- Invalid dates → error with row number
+- Invalid amounts → error with row number
+- Duplicate transactions → skip with warning
+- Missing required fields → error before import
+
+**Files:**
+- src/lib/Import.svelte (main page)
+- src/lib/components/ColumnMapper.svelte (mapping UI)
+- src-tauri/src/main.rs (batch_insert_transactions command)
 
 ---
 

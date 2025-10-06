@@ -327,6 +327,19 @@ impl Database {
         Ok(transactions)
     }
 
+    pub async fn transaction_exists(&self, date: &str, amount: f64, description: &str) -> Result<bool, sqlx::Error> {
+        let row = sqlx::query(
+            "SELECT id FROM transactions WHERE date = ? AND amount = ? AND description = ?"
+        )
+        .bind(date)
+        .bind(amount)
+        .bind(description)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        Ok(row.is_some())
+    }
+
     // Category operations
     pub async fn get_categories(&self) -> Result<Vec<Category>, sqlx::Error> {
         let rows = sqlx::query("SELECT * FROM categories ORDER BY category_type, name")
