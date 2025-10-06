@@ -19,7 +19,10 @@
         "resizable": true,
         "fullscreen": false
       }
-    ]
+    ],
+    "security": {
+      "capabilities": ["main"]
+    }
   },
   "bundle": {
     "active": false,

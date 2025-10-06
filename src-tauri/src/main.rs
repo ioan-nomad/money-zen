@@ -92,6 +92,28 @@ async fn backup_database() -> Result<String, String> {
 }
 
 #[tauri::command]
+async fn restore_database(backup_path: String) -> Result<String, String> {
+    use std::fs;
+
+    // Get active database path
+    let home_dir = std::env::var("USERPROFILE").unwrap_or_else(|_| ".".to_string());
+    let app_data_dir = std::path::Path::new(&home_dir).join("AppData").join("Local").join("MoneyZen");
+    let db_path = app_data_dir.join("money-zen.db");
+
+    // Verify backup file exists
+    let backup = std::path::Path::new(&backup_path);
+    if !backup.exists() {
+        return Err("Backup file not found".to_string());
+    }
+
+    // Copy backup to active database location (overwrite)
+    fs::copy(&backup, &db_path)
+        .map_err(|e| format!("Failed to restore database: {}", e))?;
+
+    Ok(format!("Database restored from: {}", backup_path))
+}
+
+#[tauri::command]
 async fn create_transaction(
     db: State<'_, DatabaseState>,
     account_id: String,
@@ -144,6 +166,7 @@ async fn main() {
     }
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .manage(db_state)
         .invoke_handler(tauri::generate_handler![
             greet,
@@ -153,6 +176,7 @@ async fn main() {
             update_account,
             delete_account,
             backup_database,
+            restore_database,
             create_transaction,
             get_transactions,
             get_categories

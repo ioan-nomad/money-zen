@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@tanstack/svelte-query": "^5.90.2",
+    "@tauri-apps/plugin-dialog": "^2.4.0",
     "date-fns": "^4.1.0",
     "jspdf": "^3.0.3",
     "jspdf-autotable": "^5.0.2",

@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(powershell:*)"
+      "Bash(dir \"C:\\Users\\ciupe\\Documents\\MoneyZen Backups\")",
+      "Bash(del NUL)"
     ],
     "deny": [],
     "ask": []

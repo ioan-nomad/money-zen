@@ -75,6 +75,10 @@ export class Database {
     return await invoke<string>('backup_database');
   }
 
+  static async restoreDatabase(backupPath: string): Promise<string> {
+    return await invoke<string>('restore_database', { backupPath });
+  }
+
   // Transaction operations
   static async createTransaction(
     accountId: string,
