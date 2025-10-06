@@ -91,13 +91,122 @@ package.json (jsPDF 3.0.3, jspdf-autotable 5.0.2)
 - PDF: jsPDF 3.0.3 + autoTable
 - Build: 429 modules, 8.03s
 
-## PHASE 4: IMPORT/EXPORT (Next)
-- XLSX import (bank statements)
-- SQLite backup/restore button
-- Advanced PDF reports
-- Data migration tools
+---
+
+## PHASE 4: IMPORT/EXPORT & DATA MANAGEMENT
+
+**Status:** Planning (October 6, 2025)
+**Estimated Time:** 6-8 hours
+**Goal:** Enable data import/export and backup functionality
+
+### 4.1 SQLite Backup System (Priority 1 - 1h)
+**What:** Manual backup and restore of the SQLite database file
+**Why:** Data protection - users need ability to backup their financial data
+**How:** Direct file copy using Tauri File API
+
+**Features:**
+- Backup button: Copy `money-zen.db` → `Documents/MoneyZen Backups/backup-YYYY-MM-DD.db`
+- Restore button: Select backup file → copy to active database location
+- Backup history list with dates
+- Auto-backup reminder (optional)
+
+**Tech:**
+- Tauri File API for file operations
+- Rust backend for safe file copying
+- No data transformation needed (raw SQLite file)
+
+**Location:** Settings page or Database Test tab
+
+---
+
+### 4.2 XLSX Import (Priority 2 - 3-4h)
+**What:** Import bank statements from Excel files
+**Why:** Eliminate manual entry - import 500+ transactions in seconds
+**How:** Parse XLSX with SheetJS → map to transactions → batch insert to SQLite
+
+**Features:**
+- Drag & drop Excel file upload
+- Column mapping UI (user maps bank columns to MoneyZen fields)
+- Auto-categorization based on description keywords
+- Preview before import (show first 10 rows)
+- Duplicate detection (by date + amount + description)
+- Batch insert for performance
+
+**Tech:**
+- SheetJS (already installed) for XLSX parsing
+- Tauri File API for file reading
+- Custom mapping logic (RON amounts, date formats)
+- SQLite transaction for batch insert
+
+**Data Flow:**
+1. User uploads .xlsx file
+2. SheetJS parses → JavaScript array of objects
+3. Mapping UI: user connects columns (Data → date, Suma → amount, etc.)
+4. Validation: check for required fields, valid amounts, dates
+5. Preview: show 10 sample transactions
+6. Confirm → batch insert to SQLite
+7. Refresh UI → success message
+
+**Location:** New "Import" tab in navigation
+
+---
+
+### 4.3 Advanced PDF Reports (Priority 3 - 2h)
+**What:** Enhanced PDF export with filtering options
+**Why:** Users need specific reports (monthly, per account, per category)
+**How:** Extend existing jsPDF Analytics with query filters
+
+**Report Types:**
+- **Monthly Report:** All transactions for selected month
+- **Account Report:** All transactions for specific account
+- **Category Report:** All spending in specific category
+- **Date Range Report:** Custom date range
+
+**Features:**
+- Dropdown selector for report type
+- Date pickers for range
+- Account/category dropdowns
+- Preview before export
+- Professional formatting (header, footer, page numbers)
+- Summary statistics at top
+
+**Tech:**
+- jsPDF + autoTable (already integrated)
+- SQLite queries with WHERE clauses
+- Chart.js for embedded charts (optional)
+- Same PDF generation as Analytics.svelte
+
+**Location:** Analytics page - "Export Options" dropdown
+
+---
+
+### 4.4 Data Migration Tools (Phase 5 candidate)
+**What:** Import from other finance apps (YNAB, Wallet, etc.)
+**Why:** Help users migrate without losing historical data
+**Status:** Lower priority - postponed to Phase 5
+
+---
+
+## PHASE 4 IMPLEMENTATION ORDER
+
+1. **SQLite Backup** (Day 1 morning - 1h)
+   - Fast win
+   - Critical for data safety
+   - Simple implementation
+
+2. **XLSX Import** (Day 1 afternoon - 3-4h)
+   - Most complex feature
+   - Highest user value
+   - Core functionality
+
+3. **PDF Reports** (Day 2 - 2h)
+   - Builds on existing Analytics
+   - Polish feature
+   - User delight
+
+**Total Estimated:** 6-8 hours of focused work
 
 ---
 **Phase 3 Complete:** October 5, 2025
 **Author:** Ioan + Claude Code
-**Next:** Phase 4 planning
+**Next:** Phase 4 implementation
