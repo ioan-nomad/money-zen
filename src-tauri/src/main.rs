@@ -136,24 +136,47 @@ async fn batch_insert_transactions(
     db: State<'_, DatabaseState>,
     transactions: Vec<ImportTransaction>,
 ) -> Result<ImportResult, String> {
+    println!("🔍 batch_insert_transactions called with {} transactions", transactions.len());
+
     let db = db.lock().await;
     let mut inserted = 0;
     let mut skipped = 0;
     let mut errors = Vec::new();
 
     for tx in transactions {
-        // Parse date
-        let date = match DateTime::parse_from_rfc3339(&tx.date) {
-            Ok(d) => d.with_timezone(&Utc),
-            Err(_) => {
-                errors.push(format!("Invalid date: {}", tx.date));
-                continue;
+        println!("Processing transaction: date={}, amount={}, desc={}",
+                 tx.date, tx.amount, tx.description);
+
+        // Parse date - handle YYYY-MM-DD format
+        let date = if tx.date.contains('T') {
+            // RFC3339 format (with time)
+            match DateTime::parse_from_rfc3339(&tx.date) {
+                Ok(d) => d.with_timezone(&Utc),
+                Err(_) => {
+                    println!("❌ Date parsing failed for: {}", tx.date);
+                    errors.push(format!("Invalid date: {}", tx.date));
+                    continue;
+                }
+            }
+        } else {
+            // Simple YYYY-MM-DD format
+            match chrono::NaiveDate::parse_from_str(&tx.date, "%Y-%m-%d") {
+                Ok(naive_date) => {
+                    let datetime = naive_date.and_hms_opt(0, 0, 0).unwrap();
+                    DateTime::<Utc>::from_naive_utc_and_offset(datetime, Utc)
+                },
+                Err(_) => {
+                    println!("❌ Date parsing failed for: {}", tx.date);
+                    errors.push(format!("Invalid date: {}", tx.date));
+                    continue;
+                }
             }
         };
 
         // Check duplicate (same date, amount, description)
         match db.transaction_exists(&date.to_rfc3339(), tx.amount, &tx.description).await {
             Ok(true) => {
+                println!("⏭️ Duplicate found, skipping transaction");
                 skipped += 1;
                 continue;
             }
@@ -167,8 +190,14 @@ async fn batch_insert_transactions(
                     tx.transaction_type,
                     date
                 ).await {
-                    Ok(_) => inserted += 1,
-                    Err(e) => errors.push(format!("Failed to insert: {}", e)),
+                    Ok(_) => {
+                        inserted += 1;
+                        println!("✅ Transaction inserted successfully");
+                    },
+                    Err(e) => {
+                        println!("❌ Failed to insert transaction: {:?}", e);
+                        errors.push(format!("Failed to insert: {}", e));
+                    },
                 }
             }
             Err(e) => {
@@ -239,6 +268,7 @@ async fn main() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
         .manage(db_state)
         .invoke_handler(tauri::generate_handler![
             greet,

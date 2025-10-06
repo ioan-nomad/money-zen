@@ -28,5 +28,9 @@
     "active": false,
     "createUpdaterArtifacts": false
   },
-  "plugins": {}
+  "plugins": {
+    "fs": {
+      "requireLiteralLeadingDot": false
+    }
+  }
 }

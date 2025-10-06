@@ -1,1 +1,1 @@
-{"main":{"identifier":"main","description":"Main application capabilities","local":true,"windows":["main"],"permissions":["core:default","dialog:default","dialog:allow-open","dialog:allow-save"]}}
+{"main":{"identifier":"main","description":"Main application capabilities","local":true,"windows":["main"],"permissions":["core:default","dialog:default","dialog:allow-open","dialog:allow-save","fs:allow-read-file","fs:allow-read-text-file","fs:allow-exists","fs:default"],"platforms":["linux","macOS","windows"]}}
