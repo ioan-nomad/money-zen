@@ -1,0 +1,9 @@
+# Import GroupedCategoryDropdown at top (after line 2)
+import GroupedCategoryDropdown from './GroupedCategoryDropdown.svelte';
+
+# Replace lines 58-62 with:
+<GroupedCategoryDropdown
+  categories={filteredCategories}
+  selectedId={selectedCategoryId}
+  onChange={(id) => { selectedCategoryId = id; }}
+/>
