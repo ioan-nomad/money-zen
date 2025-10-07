@@ -18,7 +18,11 @@
       "Bash(python:*)",
       "Bash(/bashes)",
       "Bash(tasklist)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(cat:*)",
+      "Bash(chmod:*)",
+      "Bash(git tag:*)",
+      "Bash(pnpm tauri:dev:*)"
     ],
     "deny": [],
     "ask": []

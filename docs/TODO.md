@@ -162,3 +162,59 @@
 
 **PHASE 3 COMPLETED:** October 5, 2025 after ~7 hours of focused development
 **Next:** Phase 4 planning
+
+---
+
+## PHASE 4.3: ADVANCED PDF REPORTS - TASK LIST
+
+**Started:** October 7, 2025
+**Estimated:** 3 hours
+**Status:** Planning → Implementation
+
+### Backend Tasks
+
+- [ ] Add `get_transactions_by_month()` to database.rs
+- [ ] Add `get_transactions_by_account()` to database.rs
+- [ ] Add `get_transactions_by_category()` to database.rs
+- [ ] Add `get_transactions_by_date_range()` to database.rs
+- [ ] Wrap functions as Tauri commands in main.rs
+- [ ] Test queries via DatabaseTest tab
+
+### Frontend Tasks
+
+- [ ] Add report type selector dropdown to Analytics.svelte
+- [ ] Add month/year pickers (conditional on "Monthly" selection)
+- [ ] Add account dropdown (conditional on "Account" selection)
+- [ ] Add category dropdown (conditional on "Category" selection)
+- [ ] Add start/end date pickers (conditional on "Date Range" selection)
+- [ ] Wire filter controls to backend commands
+- [ ] Add preview section showing filtered transactions
+- [ ] Display transaction count and summary stats
+
+### PDF Export Tasks
+
+- [ ] Extend existing jsPDF export function
+- [ ] Add dynamic report title based on filter type
+- [ ] Add filter details to PDF header (e.g., "Month: October 2025")
+- [ ] Add summary statistics section at top
+- [ ] Add detailed transactions table
+- [ ] Add professional footer with page numbers
+- [ ] Add generation timestamp
+
+### Testing Tasks
+
+- [ ] Test monthly report (multiple months)
+- [ ] Test account report (different accounts)
+- [ ] Test category report (different categories)
+- [ ] Test date range with custom periods
+- [ ] Test with 0 transactions (empty report)
+- [ ] Test with 500+ transactions (performance)
+- [ ] Verify PDF opens correctly in PDF reader
+- [ ] Check formatting on printed page
+
+### Git Commit
+
+- [ ] Commit backend changes: `feat: add filtered transaction queries for reports`
+- [ ] Commit frontend changes: `feat: add advanced PDF report filters to Analytics`
+- [ ] Commit documentation: `docs: Phase 4.3 Advanced PDF Reports complete`
+

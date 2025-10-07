@@ -340,6 +340,115 @@ impl Database {
         Ok(row.is_some())
     }
 
+    pub async fn get_transactions_by_month(&self, year: i32, month: i32) -> Result<Vec<Transaction>, sqlx::Error> {
+        let start_date = format!("{:04}-{:02}-01T00:00:00Z", year, month);
+        let end_date = if month == 12 {
+            format!("{:04}-01-01T00:00:00Z", year + 1)
+        } else {
+            format!("{:04}-{:02}-01T00:00:00Z", year, month + 1)
+        };
+
+        let rows = sqlx::query(
+            "SELECT * FROM transactions WHERE date >= ? AND date < ? ORDER BY date DESC, created_at DESC"
+        )
+        .bind(&start_date)
+        .bind(&end_date)
+        .fetch_all(&self.pool)
+        .await?;
+
+        let transactions = rows.into_iter().map(|row| {
+            Transaction {
+                id: row.get("id"),
+                account_id: row.get("account_id"),
+                category_id: row.get("category_id"),
+                amount: row.get("amount"),
+                description: row.get("description"),
+                transaction_type: row.get("transaction_type"),
+                date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),
+                created_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("created_at")).unwrap().with_timezone(&Utc),
+                updated_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("updated_at")).unwrap().with_timezone(&Utc),
+            }
+        }).collect();
+
+        Ok(transactions)
+    }
+
+    pub async fn get_transactions_by_account(&self, account_id: String) -> Result<Vec<Transaction>, sqlx::Error> {
+        let rows = sqlx::query(
+            "SELECT * FROM transactions WHERE account_id = ? ORDER BY date DESC, created_at DESC"
+        )
+        .bind(&account_id)
+        .fetch_all(&self.pool)
+        .await?;
+
+        let transactions = rows.into_iter().map(|row| {
+            Transaction {
+                id: row.get("id"),
+                account_id: row.get("account_id"),
+                category_id: row.get("category_id"),
+                amount: row.get("amount"),
+                description: row.get("description"),
+                transaction_type: row.get("transaction_type"),
+                date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),
+                created_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("created_at")).unwrap().with_timezone(&Utc),
+                updated_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("updated_at")).unwrap().with_timezone(&Utc),
+            }
+        }).collect();
+
+        Ok(transactions)
+    }
+
+    pub async fn get_transactions_by_category(&self, category_id: String) -> Result<Vec<Transaction>, sqlx::Error> {
+        let rows = sqlx::query(
+            "SELECT * FROM transactions WHERE category_id = ? ORDER BY date DESC, created_at DESC"
+        )
+        .bind(&category_id)
+        .fetch_all(&self.pool)
+        .await?;
+
+        let transactions = rows.into_iter().map(|row| {
+            Transaction {
+                id: row.get("id"),
+                account_id: row.get("account_id"),
+                category_id: row.get("category_id"),
+                amount: row.get("amount"),
+                description: row.get("description"),
+                transaction_type: row.get("transaction_type"),
+                date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),
+                created_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("created_at")).unwrap().with_timezone(&Utc),
+                updated_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("updated_at")).unwrap().with_timezone(&Utc),
+            }
+        }).collect();
+
+        Ok(transactions)
+    }
+
+    pub async fn get_transactions_by_date_range(&self, start_date: String, end_date: String) -> Result<Vec<Transaction>, sqlx::Error> {
+        let rows = sqlx::query(
+            "SELECT * FROM transactions WHERE date >= ? AND date <= ? ORDER BY date DESC, created_at DESC"
+        )
+        .bind(&start_date)
+        .bind(&end_date)
+        .fetch_all(&self.pool)
+        .await?;
+
+        let transactions = rows.into_iter().map(|row| {
+            Transaction {
+                id: row.get("id"),
+                account_id: row.get("account_id"),
+                category_id: row.get("category_id"),
+                amount: row.get("amount"),
+                description: row.get("description"),
+                transaction_type: row.get("transaction_type"),
+                date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),
+                created_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("created_at")).unwrap().with_timezone(&Utc),
+                updated_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("updated_at")).unwrap().with_timezone(&Utc),
+            }
+        }).collect();
+
+        Ok(transactions)
+    }
+
     // Category operations
     pub async fn get_categories(&self) -> Result<Vec<Category>, sqlx::Error> {
         let rows = sqlx::query("SELECT * FROM categories ORDER BY category_type, name")

@@ -279,3 +279,92 @@ Users can import transactions from Excel files (.xlsx) with automatic duplicate 
 **Phase 3 Complete:** October 5, 2025
 **Author:** Ioan + Claude Code
 **Next:** Phase 4 implementation
+
+## PHASE 4.3: ADVANCED PDF REPORTS - PLANNING
+
+**Status:** In Planning (October 7, 2025)
+**Goal:** Export filtered transaction reports to PDF with professional formatting
+
+### Backend Requirements
+
+**New Rust Functions (database.rs):**
+
+1. `get_transactions_by_month(year: i32, month: i32) -> Vec<Transaction>`
+   - Filter transactions by specific year/month
+   - Return all transactions matching date range
+
+2. `get_transactions_by_account(account_id: String) -> Vec<Transaction>`
+   - Filter transactions by account ID
+   - Useful for per-account statements
+
+3. `get_transactions_by_category(category_id: String) -> Vec<Transaction>`
+   - Filter transactions by category
+   - Useful for spending analysis per category
+
+4. `get_transactions_by_date_range(start_date: String, end_date: String) -> Vec<Transaction>`
+   - Custom date range filtering
+   - Most flexible option
+
+**New Tauri Commands (main.rs):**
+- Wrap each database function as Tauri command
+- Add to command list in tauri::Builder
+
+### Frontend Requirements
+
+**Analytics.svelte Enhancements:**
+
+1. **Report Type Selector:**
+   - Dropdown: Monthly / Account / Category / Date Range
+   - Conditional UI based on selection
+
+2. **Filter Controls:**
+   - Month/Year pickers (for Monthly)
+   - Account dropdown (for Account report)
+   - Category dropdown (for Category report)
+   - Start/End date pickers (for Date Range)
+
+3. **Preview Section:**
+   - Show filtered transactions before export
+   - Display count: "X transactions in this report"
+   - Summary stats (total income, expenses, net)
+
+4. **PDF Generation:**
+   - Reuse existing jsPDF + autoTable setup
+   - Add professional header with report type + filters
+   - Footer with page numbers and generation timestamp
+   - Summary table at top
+   - Detailed transactions table below
+
+### Implementation Steps
+
+**Phase A: Backend (1 hour)**
+1. Add 4 query functions to database.rs
+2. Add 4 Tauri commands to main.rs
+3. Test queries via DatabaseTest tab
+
+**Phase B: Frontend UI (1 hour)**
+1. Add report selector dropdown
+2. Add conditional filter controls
+3. Wire up to backend commands
+4. Test filtering works
+
+**Phase C: PDF Enhancement (30 min)**
+1. Extend existing PDF export
+2. Add dynamic title based on filters
+3. Add summary statistics section
+4. Test PDF output quality
+
+**Phase D: Testing & Polish (30 min)**
+1. Test all report types
+2. Verify PDF formatting
+3. Edge cases (0 transactions, large datasets)
+4. Git commit with conventional format
+
+### Success Criteria
+- ✅ Can export monthly report for any month
+- ✅ Can export account-specific report
+- ✅ Can export category spending report
+- ✅ Can export custom date range
+- ✅ PDF looks professional with proper headers/footers
+- ✅ Performance good with 500+ transactions
+

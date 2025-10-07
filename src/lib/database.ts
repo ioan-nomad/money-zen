@@ -102,6 +102,22 @@ export class Database {
     return await invoke('get_transactions');
   }
 
+  static async getTransactionsByMonth(year: number, month: number): Promise<Transaction[]> {
+    return await invoke('get_transactions_by_month', { year, month });
+  }
+
+  static async getTransactionsByAccount(accountId: string): Promise<Transaction[]> {
+    return await invoke('get_transactions_by_account', { accountId });
+  }
+
+  static async getTransactionsByCategory(categoryId: string): Promise<Transaction[]> {
+    return await invoke('get_transactions_by_category', { categoryId });
+  }
+
+  static async getTransactionsByDateRange(startDate: string, endDate: string): Promise<Transaction[]> {
+    return await invoke('get_transactions_by_date_range', { startDate, endDate });
+  }
+
   // Category operations
   static async getCategories(): Promise<Category[]> {
     return await invoke('get_categories');

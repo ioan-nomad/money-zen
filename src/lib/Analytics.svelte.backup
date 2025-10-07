@@ -112,30 +112,6 @@
       .slice(0, 5); // Top 5
   }
 
-  function stripEmoji(text: string): string {
-    return text.replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
-  }
-
-  // Remove Romanian diacritics for PDF compatibility
-  function removeDiacritics(str: string): string {
-    return str
-      .replace(/ă/g, 'a')
-      .replace(/â/g, 'a')
-      .replace(/î/g, 'i')
-      .replace(/ș/g, 's')
-      .replace(/ț/g, 't')
-      .replace(/Ă/g, 'A')
-      .replace(/Â/g, 'A')
-      .replace(/Î/g, 'I')
-      .replace(/Ș/g, 'S')
-      .replace(/Ț/g, 'T');
-  }
-
-  function formatAmount(amount: number, type?: string): string {
-    const absAmount = Math.abs(amount);
-    return `${absAmount.toFixed(2)} RON`;
-  }
-
   function getReportTitle(): string {
     switch (reportType) {
       case 'monthly':
@@ -145,8 +121,7 @@
         return `Account Report - ${account?.name || 'All Accounts'}`;
       case 'category':
         const category = categories.find(c => c.id === selectedCategoryId);
-        const categoryName = category ? stripEmoji(category.name) : 'All Categories';
-        return `Category Report - ${categoryName}`;
+        return `Category Report - ${category?.name || 'All Categories'}`;
       case 'date_range':
         return `Date Range Report - ${startDate} to ${endDate}`;
       default:
@@ -174,12 +149,10 @@
       startY: 65,
       head: [['Type', 'Amount']],
       body: [
-        ['Total Income', formatAmount(totalIncome)],
-        ['Total Expense', formatAmount(totalExpense)],
-        ['Net Balance', formatAmount(totalIncome - totalExpense)]
-      ],
-      styles: { fontSize: 10, cellPadding: 3 },
-      headStyles: { fillColor: [59, 130, 246], textColor: [255, 255, 255] }
+        ['Total Income', `${totalIncome.toFixed(2)} RON`],
+        ['Total Expense', `${totalExpense.toFixed(2)} RON`],
+        ['Net Balance', `${(totalIncome - totalExpense).toFixed(2)} RON`]
+      ]
     });
 
     // Top spending categories
@@ -188,12 +161,7 @@
       autoTable(doc, {
         startY: doc.lastAutoTable.finalY + 20,
         head: [['Category', 'Amount']],
-        body: spendingByCategory.map(c => [
-          stripEmoji(removeDiacritics(c.name)),
-          formatAmount(c.amount)
-        ]),
-        styles: { fontSize: 9, cellPadding: 2 },
-        headStyles: { fillColor: [239, 68, 68], textColor: [255, 255, 255] }
+        body: spendingByCategory.map(c => [c.name, `${c.amount.toFixed(2)} RON`])
       });
     }
 
@@ -206,18 +174,10 @@
         head: [['Date', 'Description', 'Type', 'Amount']],
         body: recentTransactions.map(t => [
           new Date(t.date).toLocaleDateString(),
-          removeDiacritics(t.description.length > 30 ? t.description.substring(0, 30) + '...' : t.description),
-          t.transaction_type === 'income' ? 'Income' : 'Expense',
-          formatAmount(t.amount)
-        ]),
-        styles: { fontSize: 8, cellPadding: 2 },
-        headStyles: { fillColor: [34, 197, 94], textColor: [255, 255, 255] },
-        columnStyles: {
-          0: { cellWidth: 25 },
-          1: { cellWidth: 60 },
-          2: { cellWidth: 20 },
-          3: { cellWidth: 25, halign: 'right' }
-        }
+          t.description,
+          t.transaction_type,
+          `${t.amount.toFixed(2)} RON`
+        ])
       });
     }
 
@@ -245,10 +205,10 @@
 
       <!-- Report Type Selector -->
       <div class="form-control w-full max-w-xs">
-        <label class="label" for="reportType">
+        <label class="label">
           <span class="label-text">Report Type</span>
         </label>
-        <select id="reportType" class="select select-bordered" bind:value={reportType} on:change={applyFilters}>
+        <select class="select select-bordered" bind:value={reportType} on:change={applyFilters}>
           <option value="all">All Transactions</option>
           <option value="monthly">Monthly</option>
           <option value="account">By Account</option>
@@ -261,11 +221,10 @@
       <div class="flex flex-wrap gap-4 mt-4">
         {#if reportType === 'monthly'}
           <div class="form-control">
-            <label class="label" for="selectedYear">
+            <label class="label">
               <span class="label-text">Year</span>
             </label>
             <input
-              id="selectedYear"
               type="number"
               class="input input-bordered w-24"
               bind:value={selectedYear}
@@ -275,10 +234,10 @@
             />
           </div>
           <div class="form-control">
-            <label class="label" for="selectedMonth">
+            <label class="label">
               <span class="label-text">Month</span>
             </label>
-            <select id="selectedMonth" class="select select-bordered" bind:value={selectedMonth} on:change={applyFilters}>
+            <select class="select select-bordered" bind:value={selectedMonth} on:change={applyFilters}>
               <option value={1}>January</option>
               <option value={2}>February</option>
               <option value={3}>March</option>
@@ -295,10 +254,10 @@
           </div>
         {:else if reportType === 'account'}
           <div class="form-control">
-            <label class="label" for="selectedAccount">
+            <label class="label">
               <span class="label-text">Account</span>
             </label>
-            <select id="selectedAccount" class="select select-bordered" bind:value={selectedAccountId} on:change={applyFilters}>
+            <select class="select select-bordered" bind:value={selectedAccountId} on:change={applyFilters}>
               <option value="">All Accounts</option>
               {#each accounts as account}
                 <option value={account.id}>{account.name}</option>
@@ -307,10 +266,10 @@
           </div>
         {:else if reportType === 'category'}
           <div class="form-control">
-            <label class="label" for="selectedCategory">
+            <label class="label">
               <span class="label-text">Category</span>
             </label>
-            <select id="selectedCategory" class="select select-bordered" bind:value={selectedCategoryId} on:change={applyFilters}>
+            <select class="select select-bordered" bind:value={selectedCategoryId} on:change={applyFilters}>
               <option value="">All Categories</option>
               {#each categories as category}
                 <option value={category.id}>{category.icon} {category.name}</option>
@@ -319,11 +278,10 @@
           </div>
         {:else if reportType === 'date_range'}
           <div class="form-control">
-            <label class="label" for="startDate">
+            <label class="label">
               <span class="label-text">Start Date</span>
             </label>
             <input
-              id="startDate"
               type="date"
               class="input input-bordered"
               bind:value={startDate}
@@ -331,11 +289,10 @@
             />
           </div>
           <div class="form-control">
-            <label class="label" for="endDate">
+            <label class="label">
               <span class="label-text">End Date</span>
             </label>
             <input
-              id="endDate"
               type="date"
               class="input input-bordered"
               bind:value={endDate}

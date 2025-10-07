@@ -241,6 +241,44 @@ async fn get_transactions(db: State<'_, DatabaseState>) -> Result<Vec<Transactio
 }
 
 #[tauri::command]
+async fn get_transactions_by_month(
+    db: State<'_, DatabaseState>,
+    year: i32,
+    month: i32,
+) -> Result<Vec<Transaction>, String> {
+    let db = db.lock().await;
+    db.get_transactions_by_month(year, month).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn get_transactions_by_account(
+    db: State<'_, DatabaseState>,
+    account_id: String,
+) -> Result<Vec<Transaction>, String> {
+    let db = db.lock().await;
+    db.get_transactions_by_account(account_id).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn get_transactions_by_category(
+    db: State<'_, DatabaseState>,
+    category_id: String,
+) -> Result<Vec<Transaction>, String> {
+    let db = db.lock().await;
+    db.get_transactions_by_category(category_id).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn get_transactions_by_date_range(
+    db: State<'_, DatabaseState>,
+    start_date: String,
+    end_date: String,
+) -> Result<Vec<Transaction>, String> {
+    let db = db.lock().await;
+    db.get_transactions_by_date_range(start_date, end_date).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 async fn get_categories(db: State<'_, DatabaseState>) -> Result<Vec<Category>, String> {
     let db = db.lock().await;
     db.get_categories().await.map_err(|e| e.to_string())
@@ -282,6 +320,10 @@ async fn main() {
             batch_insert_transactions,
             create_transaction,
             get_transactions,
+            get_transactions_by_month,
+            get_transactions_by_account,
+            get_transactions_by_category,
+            get_transactions_by_date_range,
             get_categories
         ])
         .run(tauri::generate_context!())
