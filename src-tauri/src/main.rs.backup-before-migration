@@ -2,7 +2,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod database;
-mod migrate_categories;
 
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -285,14 +284,6 @@ async fn get_categories(db: State<'_, DatabaseState>) -> Result<Vec<Category>, S
     db.get_categories().await.map_err(|e| e.to_string())
 }
 
-#[tauri::command]
-async fn migrate_nomad_categories(
-    db: State<'_, DatabaseState>
-) -> Result<String, String> {
-    let db = db.lock().await;
-    migrate_categories::migrate_nomad_categories(db.get_pool()).await
-}
-
 #[tokio::main]
 async fn main() {
     // Get user's app data directory
@@ -333,8 +324,7 @@ async fn main() {
             get_transactions_by_account,
             get_transactions_by_category,
             get_transactions_by_date_range,
-            get_categories,
-            migrate_nomad_categories
+            get_categories
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -53,6 +53,10 @@ impl Database {
         Ok(Database { pool })
     }
 
+    pub fn get_pool(&self) -> &SqlitePool {
+        &self.pool
+    }
+
     pub async fn init_schema(&self) -> Result<(), sqlx::Error> {
         // Create accounts table
         sqlx::query(

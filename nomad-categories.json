@@ -1,0 +1,48 @@
+{
+  "version": "1.0",
+  "source": "N-OMAD 2025",
+  "export_date": "2025-10-07",
+  "categories": {
+    "income": [
+      { "name": "Salariu", "icon": "💼", "color": "#10b981" },
+      { "name": "Freelance", "icon": "💻", "color": "#06b6d4" },
+      { "name": "Investiții", "icon": "📈", "color": "#10b981" },
+      { "name": "Rambursări", "icon": "💸", "color": "#fbbf24" },
+      { "name": "Zile Naștere", "icon": "🎂", "color": "#f472b6" },
+      { "name": "Transfer de la Nico", "icon": "👨‍💼", "color": "#22d3ee" },
+      { "name": "Transfer intern", "icon": "🔄", "color": "#94a3b8" },
+      { "name": "Altele", "icon": "❓", "color": "#9ca3af" }
+    ],
+    "expense": [
+      { "name": "Alimente", "icon": "🍎", "color": "#4ade80" },
+      { "name": "Restaurant/Comenzi", "icon": "🍽️", "color": "#f97316" },
+      { "name": "Transport", "icon": "🚗", "color": "#3b82f6" },
+      { "name": "Consumabile Casă", "icon": "🏠", "color": "#8b5cf6" },
+      { "name": "Facturi", "icon": "⚡", "color": "#ef4444" },
+      { "name": "Abonamente", "icon": "📱", "color": "#ec4899" },
+      { "name": "Achiziții Diverse", "icon": "🛍️", "color": "#06b6d4" },
+      { "name": "Concediu/Vacanță", "icon": "🏖️", "color": "#fbbf24" },
+      { "name": "Investiții", "icon": "📊", "color": "#10b981" },
+      { "name": "Economii", "icon": "💰", "color": "#22c55e" },
+      { "name": "Zile Naștere", "icon": "🎁", "color": "#f472b6" },
+      { "name": "Asigurări", "icon": "🛡️", "color": "#7c3aed" },
+      { "name": "Revizii Mașină", "icon": "🔧", "color": "#f59e0b" },
+      { "name": "Reparații Casă", "icon": "🔨", "color": "#dc2626" },
+      { "name": "Telefon/Gadgets", "icon": "📞", "color": "#0ea5e9" },
+      { "name": "Electrocasnice", "icon": "⚡", "color": "#6366f1" },
+      { "name": "Firmă Nico", "icon": "💼", "color": "#84cc16" },
+      { "name": "Donații", "icon": "❤️", "color": "#a855f7" },
+      { "name": "Nunți", "icon": "💒", "color": "#fb923c" },
+      { "name": "Mobilier", "icon": "🪑", "color": "#8b4513" },
+      { "name": "Sănătate", "icon": "🏥", "color": "#ef4444" },
+      { "name": "Scule", "icon": "🔧", "color": "#64748b" },
+      { "name": "ATM Cash", "icon": "💳", "color": "#facc15" },
+      { "name": "Altele", "icon": "❓", "color": "#9ca3af" }
+    ]
+  },
+  "summary": {
+    "total_income_categories": 8,
+    "total_expense_categories": 24,
+    "total_categories": 32
+  }
+}

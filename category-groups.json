@@ -1,0 +1,154 @@
+{
+  "version": "1.0",
+  "description": "Category Groups Mapping for MoneyZen - Grouped UI",
+  "groups": {
+    "income": [
+      {
+        "group_name": "Business Income",
+        "group_icon": "💼",
+        "group_color": "#10b981",
+        "categories": [
+          { "name": "Salariu", "icon": "💼", "color": "#10b981", "type": "income" },
+          { "name": "Freelance", "icon": "💻", "color": "#06b6d4", "type": "income" },
+          { "name": "Firmă Nico", "icon": "🏢", "color": "#84cc16", "type": "income" }
+        ]
+      },
+      {
+        "group_name": "Investments & Savings",
+        "group_icon": "📈",
+        "group_color": "#10b981",
+        "categories": [
+          { "name": "Investiții", "icon": "📈", "color": "#10b981", "type": "income" },
+          { "name": "Economii", "icon": "💰", "color": "#22c55e", "type": "income" }
+        ]
+      },
+      {
+        "group_name": "Gifts & Transfers",
+        "group_icon": "🎁",
+        "group_color": "#f472b6",
+        "categories": [
+          { "name": "Zile Naștere", "icon": "🎂", "color": "#f472b6", "type": "income" },
+          { "name": "Rambursări", "icon": "💸", "color": "#fbbf24", "type": "income" },
+          { "name": "Transfer de la Nico", "icon": "👨‍💼", "color": "#22d3ee", "type": "income" },
+          { "name": "Transfer intern", "icon": "🔄", "color": "#94a3b8", "type": "income" }
+        ]
+      },
+      {
+        "group_name": "Other Income",
+        "group_icon": "❓",
+        "group_color": "#9ca3af",
+        "categories": [
+          { "name": "Altele", "icon": "❓", "color": "#9ca3af", "type": "income" }
+        ]
+      }
+    ],
+    "expense": [
+      {
+        "group_name": "Food & Dining",
+        "group_icon": "🍔",
+        "group_color": "#4ade80",
+        "categories": [
+          { "name": "Alimente", "icon": "🍎", "color": "#4ade80", "type": "expense" },
+          { "name": "Restaurant/Comenzi", "icon": "🍽️", "color": "#f97316", "type": "expense" }
+        ]
+      },
+      {
+        "group_name": "Home & Living",
+        "group_icon": "🏠",
+        "group_color": "#8b5cf6",
+        "categories": [
+          { "name": "Consumabile Casă", "icon": "🏠", "color": "#8b5cf6", "type": "expense" },
+          { "name": "Facturi", "icon": "⚡", "color": "#ef4444", "type": "expense" },
+          { "name": "Reparații Casă", "icon": "🔨", "color": "#dc2626", "type": "expense" },
+          { "name": "Mobilier", "icon": "🪑", "color": "#8b4513", "type": "expense" },
+          { "name": "Electrocasnice", "icon": "⚡", "color": "#6366f1", "type": "expense" },
+          { "name": "Scule", "icon": "🔧", "color": "#64748b", "type": "expense" }
+        ]
+      },
+      {
+        "group_name": "Transportation",
+        "group_icon": "🚗",
+        "group_color": "#3b82f6",
+        "categories": [
+          { "name": "Transport", "icon": "🚗", "color": "#3b82f6", "type": "expense" },
+          { "name": "Revizii Mașină", "icon": "🔧", "color": "#f59e0b", "type": "expense" }
+        ]
+      },
+      {
+        "group_name": "Shopping",
+        "group_icon": "🛍️",
+        "group_color": "#06b6d4",
+        "categories": [
+          { "name": "Achiziții Diverse", "icon": "🛍️", "color": "#06b6d4", "type": "expense" },
+          { "name": "Telefon/Gadgets", "icon": "📞", "color": "#0ea5e9", "type": "expense" }
+        ]
+      },
+      {
+        "group_name": "Business Expenses",
+        "group_icon": "💼",
+        "group_color": "#84cc16",
+        "categories": [
+          { "name": "Firmă Nico", "icon": "🏢", "color": "#84cc16", "type": "expense" }
+        ]
+      },
+      {
+        "group_name": "Subscriptions & Services",
+        "group_icon": "📱",
+        "group_color": "#ec4899",
+        "categories": [
+          { "name": "Abonamente", "icon": "📱", "color": "#ec4899", "type": "expense" }
+        ]
+      },
+      {
+        "group_name": "Insurance & Healthcare",
+        "group_icon": "🛡️",
+        "group_color": "#7c3aed",
+        "categories": [
+          { "name": "Asigurări", "icon": "🛡️", "color": "#7c3aed", "type": "expense" },
+          { "name": "Sănătate", "icon": "🏥", "color": "#ef4444", "type": "expense" }
+        ]
+      },
+      {
+        "group_name": "Entertainment",
+        "group_icon": "🎬",
+        "group_color": "#fbbf24",
+        "categories": [
+          { "name": "Concediu/Vacanță", "icon": "🏖️", "color": "#fbbf24", "type": "expense" }
+        ]
+      },
+      {
+        "group_name": "Gifts & Events",
+        "group_icon": "🎁",
+        "group_color": "#f472b6",
+        "categories": [
+          { "name": "Zile Naștere", "icon": "🎁", "color": "#f472b6", "type": "expense" },
+          { "name": "Nunți", "icon": "💒", "color": "#fb923c", "type": "expense" },
+          { "name": "Donații", "icon": "❤️", "color": "#a855f7", "type": "expense" }
+        ]
+      },
+      {
+        "group_name": "Cash & Transfers",
+        "group_icon": "💳",
+        "group_color": "#facc15",
+        "categories": [
+          { "name": "ATM Cash", "icon": "💳", "color": "#facc15", "type": "expense" }
+        ]
+      },
+      {
+        "group_name": "Other Expenses",
+        "group_icon": "❓",
+        "group_color": "#9ca3af",
+        "categories": [
+          { "name": "Altele", "icon": "❓", "color": "#9ca3af", "type": "expense" }
+        ]
+      }
+    ]
+  },
+  "statistics": {
+    "total_groups_income": 4,
+    "total_groups_expense": 11,
+    "total_categories_income": 10,
+    "total_categories_expense": 23,
+    "total_categories": 33
+  }
+}

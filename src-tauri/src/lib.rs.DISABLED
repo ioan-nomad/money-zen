@@ -1,0 +1,4 @@
+// lib.rs - Library module exports
+
+pub mod database;
+pub mod migrate_categories;
