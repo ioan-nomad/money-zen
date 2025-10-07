@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Category } from '../database';
+  import { onMount } from 'svelte';
 
   export let categories: Category[] = [];
   export let selectedId: string = '';
@@ -7,6 +8,7 @@
 
   let isOpen = false;
   let searchQuery = '';
+  let containerRef: HTMLDivElement;
 
   // Get selected category object
   $: selectedCategory = categories.find(c => c.id === selectedId);
@@ -26,10 +28,48 @@
     onChange(categoryId);
     isOpen = false; // Close dropdown after selection
   }
+
+  // Keyboard handler
+  function handleKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape' && isOpen) {
+      isOpen = false;
+    }
+  }
+
+  // Click outside handler with proper timing
+  function handleClickOutside(event: MouseEvent) {
+    if (!containerRef) return;
+
+    const target = event.target as Node;
+
+    // Check if click is outside the container
+    if (!containerRef.contains(target) && isOpen) {
+      isOpen = false;
+    }
+  }
+
+  // Setup click outside listener when dropdown opens
+  $: if (isOpen) {
+    // Small delay to avoid immediate close from toggle click
+    setTimeout(() => {
+      document.addEventListener('click', handleClickOutside);
+    }, 0);
+  } else {
+    document.removeEventListener('click', handleClickOutside);
+  }
+
+  // Cleanup on component destroy
+  onMount(() => {
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  });
 </script>
 
+<svelte:window on:keydown={handleKeydown} />
+
 <!-- Toggle Button -->
-<div class="relative w-full">
+<div class="relative w-full" bind:this={containerRef}>
   <button
     type="button"
     on:click={toggleDropdown}
