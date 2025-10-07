@@ -52,4 +52,4 @@ coverage/
 # Temporary files
 temp_icon.png
 *.tmp
-temp_*
+temp_*.claude/settings.local.json
