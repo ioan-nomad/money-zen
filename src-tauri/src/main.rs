@@ -6,7 +6,7 @@ mod migrate_categories;
 
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use tauri::State;
+use tauri::{State, Manager};
 use database::{Database, Account, Transaction, Category};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -82,17 +82,18 @@ async fn delete_account(db: State<'_, DatabaseState>, id: String) -> Result<(), 
 }
 
 #[tauri::command]
-async fn backup_database() -> Result<String, String> {
+async fn backup_database(app: tauri::AppHandle) -> Result<String, String> {
     use std::fs;
     use chrono::Local;
 
-    // Get paths - using the same path logic as main()
-    let home_dir = std::env::var("USERPROFILE").unwrap_or_else(|_| ".".to_string());
-    let app_data_dir = std::path::Path::new(&home_dir).join("AppData").join("Local").join("MoneyZen");
+    // Get paths using Tauri API
+    let app_data_dir = app.path().app_local_data_dir()
+        .map_err(|e| format!("Failed to get app data directory: {}", e))?;
     let db_path = app_data_dir.join("money-zen.db");
 
     // Create backup directory in Documents
-    let documents_dir = std::path::Path::new(&home_dir).join("Documents");
+    let documents_dir = app.path().document_dir()
+        .map_err(|e| format!("Failed to get documents directory: {}", e))?;
     let backup_dir = documents_dir.join("MoneyZen Backups");
     fs::create_dir_all(&backup_dir)
         .map_err(|e| format!("Failed to create backup directory: {}", e))?;
@@ -111,12 +112,12 @@ async fn backup_database() -> Result<String, String> {
 }
 
 #[tauri::command]
-async fn restore_database(backup_path: String) -> Result<String, String> {
+async fn restore_database(app: tauri::AppHandle, backup_path: String) -> Result<String, String> {
     use std::fs;
 
-    // Get active database path
-    let home_dir = std::env::var("USERPROFILE").unwrap_or_else(|_| ".".to_string());
-    let app_data_dir = std::path::Path::new(&home_dir).join("AppData").join("Local").join("MoneyZen");
+    // Get active database path using Tauri API
+    let app_data_dir = app.path().app_local_data_dir()
+        .map_err(|e| format!("Failed to get app data directory: {}", e))?;
     let db_path = app_data_dir.join("money-zen.db");
 
     // Verify backup file exists
@@ -295,28 +296,40 @@ async fn migrate_nomad_categories(
 
 #[tokio::main]
 async fn main() {
-    // Get user's app data directory
-    let home_dir = std::env::var("USERPROFILE").unwrap_or_else(|_| ".".to_string());
-    let app_data_dir = std::path::Path::new(&home_dir).join("AppData").join("Local").join("MoneyZen");
-    std::fs::create_dir_all(&app_data_dir).expect("Failed to create app data directory");
-
-    let database_path = app_data_dir.join("money-zen.db");
-
-    let database = Database::new(database_path).await.expect("Failed to connect to database");
-    let db_state = Arc::new(Mutex::new(database));
-
-    // Initialize schema
-    {
-        let db = db_state.lock().await;
-        if let Err(e) = db.init_schema().await {
-            eprintln!("Failed to initialize database schema: {}", e);
-        }
-    }
-
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
-        .manage(db_state)
+        .setup(|app| {
+            let handle = app.handle().clone();
+
+            // Use Tauri's path API to get the correct app data directory
+            let app_data_dir = handle.path().app_local_data_dir()
+                .expect("Failed to get app data directory");
+            std::fs::create_dir_all(&app_data_dir)
+                .expect("Failed to create app data directory");
+
+            let database_path = app_data_dir.join("money-zen.db");
+
+            // Initialize database in async context
+            tauri::async_runtime::spawn(async move {
+                let database = Database::new(database_path).await
+                    .expect("Failed to connect to database");
+                let db_state = Arc::new(Mutex::new(database));
+
+                // Initialize schema
+                {
+                    let db = db_state.lock().await;
+                    if let Err(e) = db.init_schema().await {
+                        eprintln!("Failed to initialize database schema: {}", e);
+                    }
+                }
+
+                // Store the database state in the app
+                handle.manage(db_state);
+            });
+
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             greet,
             init_database,

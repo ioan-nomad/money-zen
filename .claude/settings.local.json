@@ -48,7 +48,12 @@
       "Bash(else echo \"   ❌ package.json LIPSĂ!\")",
       "Bash(rm:*)",
       "Bash(pnpm install:*)",
-      "Bash(npm run tauri:*)"
+      "Bash(npm run tauri:*)",
+      "Bash(sqlite3:*)",
+      "Bash(ls:*)",
+      "Bash(if [ -f \"$LOCALAPPDATA/io.moneyzen.app/money-zen.db\" ])",
+      "Bash(then echo \"✅ NEW database exists! Checking categories...\")",
+      "Bash(else echo \"❌ NEW database NOT created yet!\")"
     ],
     "deny": [],
     "ask": []

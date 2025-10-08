@@ -204,7 +204,12 @@ impl Database {
                 account_type: row.get("account_type"),
                 balance: row.get("balance"),
                 currency: row.get("currency"),
-                created_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("created_at")).unwrap().with_timezone(&Utc),
+                created_at: {
+                    let datetime_str: String = row.get("created_at");
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")
+                        .unwrap()
+                        .and_utc()
+                },
                 updated_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("updated_at")).unwrap().with_timezone(&Utc),
             }
         }).collect();
@@ -238,7 +243,12 @@ impl Database {
             account_type: row.get("account_type"),
             balance: row.get("balance"),
             currency: row.get("currency"),
-            created_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("created_at")).unwrap().with_timezone(&Utc),
+            created_at: {
+                    let datetime_str: String = row.get("created_at");
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")
+                        .unwrap()
+                        .and_utc()
+                },
             updated_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("updated_at")).unwrap().with_timezone(&Utc),
         })
     }
@@ -323,7 +333,12 @@ impl Database {
                 description: row.get("description"),
                 transaction_type: row.get("transaction_type"),
                 date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),
-                created_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("created_at")).unwrap().with_timezone(&Utc),
+                created_at: {
+                    let datetime_str: String = row.get("created_at");
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")
+                        .unwrap()
+                        .and_utc()
+                },
                 updated_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("updated_at")).unwrap().with_timezone(&Utc),
             }
         }).collect();
@@ -369,7 +384,12 @@ impl Database {
                 description: row.get("description"),
                 transaction_type: row.get("transaction_type"),
                 date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),
-                created_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("created_at")).unwrap().with_timezone(&Utc),
+                created_at: {
+                    let datetime_str: String = row.get("created_at");
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")
+                        .unwrap()
+                        .and_utc()
+                },
                 updated_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("updated_at")).unwrap().with_timezone(&Utc),
             }
         }).collect();
@@ -394,7 +414,12 @@ impl Database {
                 description: row.get("description"),
                 transaction_type: row.get("transaction_type"),
                 date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),
-                created_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("created_at")).unwrap().with_timezone(&Utc),
+                created_at: {
+                    let datetime_str: String = row.get("created_at");
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")
+                        .unwrap()
+                        .and_utc()
+                },
                 updated_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("updated_at")).unwrap().with_timezone(&Utc),
             }
         }).collect();
@@ -419,7 +444,12 @@ impl Database {
                 description: row.get("description"),
                 transaction_type: row.get("transaction_type"),
                 date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),
-                created_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("created_at")).unwrap().with_timezone(&Utc),
+                created_at: {
+                    let datetime_str: String = row.get("created_at");
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")
+                        .unwrap()
+                        .and_utc()
+                },
                 updated_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("updated_at")).unwrap().with_timezone(&Utc),
             }
         }).collect();
@@ -445,7 +475,12 @@ impl Database {
                 description: row.get("description"),
                 transaction_type: row.get("transaction_type"),
                 date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),
-                created_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("created_at")).unwrap().with_timezone(&Utc),
+                created_at: {
+                    let datetime_str: String = row.get("created_at");
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")
+                        .unwrap()
+                        .and_utc()
+                },
                 updated_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("updated_at")).unwrap().with_timezone(&Utc),
             }
         }).collect();
@@ -466,7 +501,12 @@ impl Database {
                 color: row.get("color"),
                 icon: row.get("icon"),
                 category_type: row.get("category_type"),
-                created_at: DateTime::parse_from_rfc3339(&row.get::<String, _>("created_at")).unwrap().with_timezone(&Utc),
+                created_at: {
+                    let datetime_str: String = row.get("created_at");
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")
+                        .unwrap()
+                        .and_utc()
+                },
             }
         }).collect();
 
