@@ -60,7 +60,8 @@
       "Bash(else echo \"❌ Database NOT found at: $db_path\")",
       "Bash(then echo \"Database exists at: $db_path\")",
       "Bash(else echo \"Database not found at: $db_path\")",
-      "Bash(tasklist:*)"
+      "Bash(tasklist:*)",
+      "Bash(powershell:*)"
     ],
     "deny": [],
     "ask": []

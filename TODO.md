@@ -22,3 +22,33 @@
 - Visual Grouping (Income/Expense): DONE
 - Integration with AddTransactionForm: DONE
 - Status: PRODUCTION READY - Search box skipped (not needed for 32 categories)
+
+### Owner Column & N-OMAD Accounts
+- [x] Added owner field to Account struct and database schema
+- [x] Implemented safe migration for owner column (DEFAULT 'Unknown')
+- [x] Inserted 12 N-OMAD accounts with proper owner assignment
+- [x] **Ioan accounts (3):** BT Ioan, Revolut Ioan, Wise Ioan
+- [x] **Nico accounts (5):** BT Current, ANPH, Savings, EUR variants
+- [x] **Company account (1):** Firmă
+- [x] **Cash accounts (3):** Ioan, Nico, Comun
+
+## 🔄 IN PROGRESS (October 8, 2025)
+
+### Code Quality & Maintenance
+- [ ] Fix deprecation warnings in datetime parsing (from_timestamp_opt → from_timestamp)
+- [ ] Complete chrono API migration across all database methods
+- [ ] Test updated datetime parsing with all database operations
+
+## 🚀 NEXT PRIORITIES
+
+### Frontend Development
+- [ ] Implement accounts dropdown in AddTransactionForm
+- [ ] Add transaction form validation
+- [ ] Create transaction list view with owner filtering
+- [ ] Add transaction editing functionality
+
+### Backend Enhancements
+- [ ] Add transaction creation endpoints
+- [ ] Implement account balance calculation
+- [ ] Add transaction search and filtering
+- [ ] Create backup/restore functionality

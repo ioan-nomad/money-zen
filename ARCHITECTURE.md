@@ -85,3 +85,41 @@ CREATE TABLE categories (
 - ✅ Frontend-Backend connection stable
 - ✅ Database persistence working
 - ✅ Separate from N-OMAD (no conflicts)
+---
+
+## TODAY'S PROGRESS (October 8, 2025)
+
+### Owner Column & N-OMAD Accounts Implementation
+
+#### Account Schema Enhancement
+**Added owner field** to Account struct and database schema:
+
+```rust
+pub struct Account {
+    pub id: String,
+    pub name: String,
+    pub account_type: String,
+    pub balance: f64,
+    pub currency: String,
+    pub owner: String,        // NEW: "Ioan", "Nico", "Firmă"
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+```
+
+#### 12 N-OMAD Accounts Inserted
+- **Ioan (3):** BT Ioan, Revolut Ioan, Wise Ioan
+- **Nico (5):** BT Current, ANPH, Savings, EUR variants
+- **Company (1):** Firmă
+- **Cash (3):** Ioan, Nico, Comun
+
+#### Deprecation Fixes
+Fixed `from_timestamp_opt()` deprecation warnings:
+```rust
+// OLD: chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()
+// NEW: chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()
+```
+
+#### Latest Commits
+- `3ebdb2c` - feat: Add owner column and N-OMAD accounts
+- 🔄 **Current:** Fixing deprecation warnings in datetime parsing
