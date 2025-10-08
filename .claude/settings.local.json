@@ -53,7 +53,14 @@
       "Bash(ls:*)",
       "Bash(if [ -f \"$LOCALAPPDATA/io.moneyzen.app/money-zen.db\" ])",
       "Bash(then echo \"✅ NEW database exists! Checking categories...\")",
-      "Bash(else echo \"❌ NEW database NOT created yet!\")"
+      "Bash(else echo \"❌ NEW database NOT created yet!\")",
+      "Bash(db_path=\"$LOCALAPPDATA/io.moneyzen.app/money-zen.db\")",
+      "Bash(if [ -f \"$db_path\" ])",
+      "Bash(then echo \"✅ Database found: $db_path\")",
+      "Bash(else echo \"❌ Database NOT found at: $db_path\")",
+      "Bash(then echo \"Database exists at: $db_path\")",
+      "Bash(else echo \"Database not found at: $db_path\")",
+      "Bash(tasklist:*)"
     ],
     "deny": [],
     "ask": []
