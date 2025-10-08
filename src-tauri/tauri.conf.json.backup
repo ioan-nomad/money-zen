@@ -1,7 +1,7 @@
 {
   "productName": "MoneyZen",
   "version": "0.0.0",
-  "identifier": "io.moneyzen.app",
+  "identifier": "com.moneyzen.app",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "beforeBuildCommand": "pnpm build",
