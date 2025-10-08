@@ -237,6 +237,38 @@ async fn create_transaction(
 }
 
 #[tauri::command]
+async fn update_transaction(
+    db: State<'_, DatabaseState>,
+    id: String,
+    account_id: String,
+    category_id: String,
+    amount: f64,
+    description: String,
+    transaction_type: String,
+    date: String,
+) -> Result<Transaction, String> {
+    let db = db.lock().await;
+    let parsed_date = DateTime::parse_from_rfc3339(&date)
+        .map_err(|e| format!("Invalid date format: {}", e))?
+        .with_timezone(&Utc);
+
+    db.update_transaction(id, account_id, category_id, amount, description, transaction_type, parsed_date)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn delete_transaction(
+    id: String,
+    db: State<'_, DatabaseState>,
+) -> Result<(), String> {
+    let db = db.lock().await;
+    db.delete_transaction(id)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 async fn get_transactions(db: State<'_, DatabaseState>) -> Result<Vec<Transaction>, String> {
     let db = db.lock().await;
     db.get_transactions().await.map_err(|e| e.to_string())
@@ -341,6 +373,8 @@ async fn main() {
             restore_database,
             batch_insert_transactions,
             create_transaction,
+            update_transaction,
+            delete_transaction,
             get_transactions,
             get_transactions_by_month,
             get_transactions_by_account,
