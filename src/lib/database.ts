@@ -119,6 +119,10 @@ export class Database {
     return await invoke('get_transactions_by_date_range', { startDate, endDate });
   }
 
+  static async deleteTransaction(id: string): Promise<void> {
+    await invoke('delete_transaction', { id });
+  }
+
   // Category operations
   static async getCategories(): Promise<Category[]> {
     return await invoke('get_categories');

@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Transaction, Account, Category } from '../database';
+  import { Database } from '../database';  // ← NEW IMPORT
   import TransactionItem from './TransactionItem.svelte';
 
   export let transactions: Transaction[];
@@ -18,6 +19,21 @@
     const matchesType = filterType === 'all' || t.transaction_type === filterType;
     return matchesSearch && matchesAccount && matchesCategory && matchesType;
   });
+
+  // ← NEW FUNCTION: Handle delete event
+  async function handleDelete(event: CustomEvent<string>) {
+    const transactionId = event.detail;
+
+    try {
+      await Database.deleteTransaction(transactionId);
+
+      // Remove from local array to update UI immediately
+      transactions = transactions.filter(t => t.id !== transactionId);
+    } catch (error) {
+      console.error('Failed to delete transaction:', error);
+      alert('Eroare la ștergerea tranzacției. Încearcă din nou.');
+    }
+  }
 </script>
 
 <div class="card bg-base-100 shadow-xl">
@@ -62,7 +78,12 @@
         </div>
       {:else}
         {#each filteredTransactions as transaction}
-          <TransactionItem {transaction} />
+          <TransactionItem
+            {transaction}
+            {accounts}
+            {categories}
+            on:delete={handleDelete}
+          />
         {/each}
       {/if}
     </div>
