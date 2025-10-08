@@ -8,6 +8,7 @@ export interface Account {
   currency: string;
   created_at: string;
   updated_at: string;
+  owner: string;  // ADD THIS LINE
 }
 
 export interface Category {

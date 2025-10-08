@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Account, Category } from '../database';
   import GroupedCategoryDropdown from './GroupedCategoryDropdown.svelte';
+  import GroupedAccountDropdown from './GroupedAccountDropdown.svelte';
 
   export let accounts: Account[];
   export let categories: Category[];
@@ -45,11 +46,11 @@
     <h3 class="card-title">💸 Add Transaction</h3>
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-      <select class="select select-bordered" bind:value={selectedAccountId}>
-        {#each accounts as account}
-          <option value={account.id}>{account.name}</option>
-        {/each}
-      </select>
+      <GroupedAccountDropdown
+        accounts={accounts}
+        selectedAccountId={selectedAccountId}
+        onSelect={(id) => selectedAccountId = id}
+      />
 
       <select class="select select-bordered" bind:value={transactionType}>
         <option value="expense">Expense</option>
