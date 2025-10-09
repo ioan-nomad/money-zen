@@ -131,6 +131,10 @@ export class Database {
     await invoke('delete_transaction', { id });
   }
 
+  static async deleteMultipleTransactions(transactionIds: string[]): Promise<number> {
+    return await invoke('delete_multiple_transactions', { transactionIds });
+  }
+
   static async updateTransaction(
     id: string,
     accountId: string,

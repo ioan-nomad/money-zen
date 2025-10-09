@@ -25,6 +25,7 @@
   // Bulk operations state
   let selectedTransactionIds: Set<string> = new Set();
   let selectAll = false;
+  let showBulkDeleteModal = false;
 
   // Track transaction tags for filtering
   let transactionTagsMap = new Map<string, string[]>();
@@ -169,10 +170,33 @@
     }
   }
 
-  // Bulk operations handlers (placeholder functions)
+  // Bulk operations handlers
   function handleBulkDelete() {
-    // TODO: Implement bulk delete confirmation dialog
-    console.log('Bulk delete:', Array.from(selectedTransactionIds));
+    if (selectedTransactionIds.size === 0) return;
+    showBulkDeleteModal = true;
+  }
+
+  async function confirmBulkDelete() {
+    try {
+      const idsArray = Array.from(selectedTransactionIds);
+      const deletedCount = await Database.deleteMultipleTransactions(idsArray);
+
+      showBulkDeleteModal = false;
+      selectedTransactionIds = new Set();
+      selectAll = false;
+
+      // Remove deleted transactions from local array
+      transactions = transactions.filter(t => !idsArray.includes(t.id));
+
+      console.log(`Successfully deleted ${deletedCount} transactions`);
+    } catch (err) {
+      console.error('Bulk delete failed:', err);
+      alert('Error deleting transactions. Please try again.');
+    }
+  }
+
+  function cancelBulkDelete() {
+    showBulkDeleteModal = false;
   }
 
   function openBulkTagEditor() {
@@ -272,3 +296,32 @@
     </div>
   </div>
 </div>
+
+<!-- Bulk Delete Confirmation Modal -->
+{#if showBulkDeleteModal}
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-base-100 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+      <h3 class="text-lg font-bold mb-4">Confirm Bulk Delete</h3>
+      <p class="mb-6">
+        Are you sure you want to delete <span class="font-bold text-error">{selectedTransactionIds.size}</span>
+        selected transaction{selectedTransactionIds.size === 1 ? '' : 's'}?
+      </p>
+      <p class="text-sm opacity-70 mb-6">This action cannot be undone.</p>
+
+      <div class="flex gap-3 justify-end">
+        <button
+          class="btn btn-ghost"
+          on:click={cancelBulkDelete}
+        >
+          Cancel
+        </button>
+        <button
+          class="btn btn-error"
+          on:click={confirmBulkDelete}
+        >
+          🗑️ Delete {selectedTransactionIds.size} Transaction{selectedTransactionIds.size === 1 ? '' : 's'}
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
