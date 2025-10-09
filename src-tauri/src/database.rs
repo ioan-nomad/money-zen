@@ -449,6 +449,27 @@ impl Database {
         Ok(())
     }
 
+    pub async fn delete_multiple_transactions(
+        &self,
+        transaction_ids: Vec<String>,
+    ) -> Result<usize, sqlx::Error> {
+        let mut deleted_count: usize = 0;
+
+        for transaction_id in transaction_ids {
+            // Delete transaction (cascade deletes transaction_tags automatically)
+            let result = sqlx::query("DELETE FROM transactions WHERE id = ?")
+                .bind(&transaction_id)
+                .execute(&self.pool)
+                .await?;
+
+            if result.rows_affected() > 0 {
+                deleted_count += 1;
+            }
+        }
+
+        Ok(deleted_count)
+    }
+
     pub async fn get_transactions(&self) -> Result<Vec<Transaction>, sqlx::Error> {
         let rows = sqlx::query("SELECT * FROM transactions ORDER BY date DESC, created_at DESC")
             .fetch_all(&self.pool)

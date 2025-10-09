@@ -271,6 +271,17 @@ async fn delete_transaction(
 }
 
 #[tauri::command]
+async fn delete_multiple_transactions(
+    transaction_ids: Vec<String>,
+    db: State<'_, DatabaseState>,
+) -> Result<usize, String> {
+    let db = db.lock().await;
+    db.delete_multiple_transactions(transaction_ids)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 async fn get_transactions(db: State<'_, DatabaseState>) -> Result<Vec<Transaction>, String> {
     let db = db.lock().await;
     db.get_transactions().await.map_err(|e| e.to_string())
@@ -491,6 +502,7 @@ async fn main() {
             create_transaction,
             update_transaction,
             delete_transaction,
+            delete_multiple_transactions,
             get_transactions,
             get_transactions_by_month,
             get_transactions_by_account,
