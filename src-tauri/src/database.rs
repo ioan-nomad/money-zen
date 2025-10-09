@@ -470,6 +470,44 @@ impl Database {
         Ok(deleted_count)
     }
 
+    pub async fn bulk_update_transaction_tags(
+        &self,
+        transaction_ids: Vec<String>,
+        tags_to_add: Option<Vec<String>>,
+        tags_to_remove: Option<Vec<String>>,
+    ) -> Result<usize, sqlx::Error> {
+        let mut updated_count: usize = 0;
+
+        for transaction_id in transaction_ids {
+            // Remove tags if specified
+            if let Some(ref tags_to_remove) = tags_to_remove {
+                for tag_id in tags_to_remove {
+                    sqlx::query("DELETE FROM transaction_tags WHERE transaction_id = ? AND tag_id = ?")
+                        .bind(&transaction_id)
+                        .bind(tag_id)
+                        .execute(&self.pool)
+                        .await?;
+                }
+            }
+
+            // Add tags if specified
+            if let Some(ref tags_to_add) = tags_to_add {
+                for tag_id in tags_to_add {
+                    // Insert only if not already exists (ignore duplicates)
+                    sqlx::query("INSERT OR IGNORE INTO transaction_tags (transaction_id, tag_id) VALUES (?, ?)")
+                        .bind(&transaction_id)
+                        .bind(tag_id)
+                        .execute(&self.pool)
+                        .await?;
+                }
+            }
+
+            updated_count += 1;
+        }
+
+        Ok(updated_count)
+    }
+
     pub async fn get_transactions(&self) -> Result<Vec<Transaction>, sqlx::Error> {
         let rows = sqlx::query("SELECT * FROM transactions ORDER BY date DESC, created_at DESC")
             .fetch_all(&self.pool)
