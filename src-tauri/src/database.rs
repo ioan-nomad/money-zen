@@ -253,11 +253,11 @@ impl Database {
                 owner: row.get("owner"),
                 created_at: {
                     let datetime_str: String = row.get("created_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
                 updated_at: {
                     let datetime_str: String = row.get("updated_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
             }
         }).collect();
@@ -294,11 +294,11 @@ impl Database {
             owner: row.get("owner"),
             created_at: {
                     let datetime_str: String = row.get("created_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
             updated_at: {
                     let datetime_str: String = row.get("updated_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
         })
     }
@@ -486,11 +486,11 @@ impl Database {
                 date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),
                 created_at: {
                     let datetime_str: String = row.get("created_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
                 updated_at: {
                     let datetime_str: String = row.get("updated_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
             }
         }).collect();
@@ -538,11 +538,11 @@ impl Database {
                 date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),
                 created_at: {
                     let datetime_str: String = row.get("created_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
                 updated_at: {
                     let datetime_str: String = row.get("updated_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
             }
         }).collect();
@@ -569,11 +569,11 @@ impl Database {
                 date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),
                 created_at: {
                     let datetime_str: String = row.get("created_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
                 updated_at: {
                     let datetime_str: String = row.get("updated_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
             }
         }).collect();
@@ -600,11 +600,11 @@ impl Database {
                 date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),
                 created_at: {
                     let datetime_str: String = row.get("created_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
                 updated_at: {
                     let datetime_str: String = row.get("updated_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
             }
         }).collect();
@@ -632,11 +632,11 @@ impl Database {
                 date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),
                 created_at: {
                     let datetime_str: String = row.get("created_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
                 updated_at: {
                     let datetime_str: String = row.get("updated_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
             }
         }).collect();
@@ -741,7 +741,7 @@ impl Database {
             created_at: {
                 let datetime_str: String = row.get("created_at");
                 chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")
-                    .unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap())
+                    .unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc())
                     .and_utc()
             },
         })
@@ -782,7 +782,7 @@ impl Database {
                 category_type: row.get("category_type"),
                 created_at: {
                     let datetime_str: String = row.get("created_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
             }
         }).collect();
@@ -914,7 +914,7 @@ impl Database {
                 icon: row.get("icon"),
                 created_at: {
                     let datetime_str: String = row.get("created_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
             }
         }).collect();
@@ -978,7 +978,7 @@ impl Database {
                 icon: row.get("icon"),
                 created_at: {
                     let datetime_str: String = row.get("created_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
             }
         }).collect();
@@ -1009,15 +1009,15 @@ impl Database {
                 transaction_type: row.get("transaction_type"),
                 date: {
                     let date_str: String = row.get("date");
-                    chrono::NaiveDateTime::parse_from_str(&date_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&date_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
                 created_at: {
                     let datetime_str: String = row.get("created_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
                 updated_at: {
                     let datetime_str: String = row.get("updated_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
             }
         }).collect();
