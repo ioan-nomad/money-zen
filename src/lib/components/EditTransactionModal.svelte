@@ -63,8 +63,8 @@
     <div class="card-body">
       <!-- Header with Close Button -->
       <div class="flex justify-between items-center mb-4">
-        <h2 class="card-title text-2xl"> Edit Transaction</h2>
-        <button class="btn btn-sm btn-circle btn-ghost" on:click={handleClose}></button>
+        <h2 class="card-title text-2xl">✏️ Edit Transaction</h2>
+        <button class="btn btn-sm btn-circle btn-ghost" on:click={handleClose}>✕</button>
       </div>
 
       <!-- Form Grid -->

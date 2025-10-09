@@ -213,11 +213,11 @@ impl Database {
                 owner: row.get("owner"),
                 created_at: {
                     let datetime_str: String = row.get("created_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
                 updated_at: {
                     let datetime_str: String = row.get("updated_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
             }
         }).collect();
@@ -254,11 +254,11 @@ impl Database {
             owner: row.get("owner"),
             created_at: {
                     let datetime_str: String = row.get("created_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
             updated_at: {
                     let datetime_str: String = row.get("updated_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
         })
     }
@@ -329,78 +329,7 @@ impl Database {
         })
     }
 
-    pub async fn update_transaction(
-        &self,
-        id: String,
-        account_id: String,
-        category_id: String,
-        amount: f64,
-        description: String,
-        transaction_type: String,
-        date: DateTime<Utc>,
-    ) -> Result<Transaction, sqlx::Error> {
-        let now = Utc::now();
-
-        sqlx::query(
-            r#"
-            UPDATE transactions
-            SET account_id = ?, category_id = ?, amount = ?, description = ?,
-                transaction_type = ?, date = ?, updated_at = ?
-            WHERE id = ?
-            "#
-        )
-        .bind(&account_id)
-        .bind(&category_id)
-        .bind(amount)
-        .bind(&description)
-        .bind(&transaction_type)
-        .bind(date.to_rfc3339())
-        .bind(now.to_rfc3339())
-        .bind(&id)
-        .execute(&self.pool)
-        .await?;
-
-        // Return the updated transaction
-        let row = sqlx::query("SELECT * FROM transactions WHERE id = ?")
-            .bind(&id)
-            .fetch_one(&self.pool)
-            .await?;
-
-        Ok(Transaction {
-            id: row.get("id"),
-            account_id: row.get("account_id"),
-            category_id: row.get("category_id"),
-            amount: row.get("amount"),
-            description: row.get("description"),
-            transaction_type: row.get("transaction_type"),
-            date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),
-            created_at: {
-                let datetime_str: String = row.get("created_at");
-                chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")
-                    .unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc())
-                    .and_utc()
-            },
-            updated_at: {
-                let datetime_str: String = row.get("updated_at");
-                chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")
-                    .unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc())
-                    .and_utc()
-            },
-        })
-    }
-
-    pub async fn delete_transaction(
-        &self,
-        id: String,
-    ) -> Result<(), sqlx::Error> {
-        sqlx::query("DELETE FROM transactions WHERE id = ?")
-            .bind(&id)
-            .execute(&self.pool)
-            .await?;
-
-        Ok(())
-    }
-
+pub async fn update_transaction(        &self,        id: String,        account_id: String,        category_id: String,        amount: f64,        description: String,        transaction_type: String,        date: DateTime<Utc>,    ) -> Result<Transaction, sqlx::Error> {        let now = Utc::now();        sqlx::query(            r#"            UPDATE transactions            SET account_id = ?, category_id = ?, amount = ?, description = ?,                transaction_type = ?, date = ?, updated_at = ?            WHERE id = ?            "#        )        .bind(&account_id)        .bind(&category_id)        .bind(amount)        .bind(&description)        .bind(&transaction_type)        .bind(date.to_rfc3339())        .bind(now.to_rfc3339())        .bind(&id)        .execute(&self.pool)        .await?;        let row = sqlx::query("SELECT * FROM transactions WHERE id = ?")            .bind(&id)            .fetch_one(&self.pool)            .await?;        Ok(Transaction {            id: row.get("id"),            account_id: row.get("account_id"),            category_id: row.get("category_id"),            amount: row.get("amount"),            description: row.get("description"),            transaction_type: row.get("transaction_type"),            date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),            created_at: {                let datetime_str: String = row.get("created_at");                chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")                    .unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc())                    .and_utc()            },            updated_at: {                let datetime_str: String = row.get("updated_at");                chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")                    .unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc())                    .and_utc()            },        })    }
     pub async fn get_transactions(&self) -> Result<Vec<Transaction>, sqlx::Error> {
         let rows = sqlx::query("SELECT * FROM transactions ORDER BY date DESC, created_at DESC")
             .fetch_all(&self.pool)
@@ -417,11 +346,11 @@ impl Database {
                 date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),
                 created_at: {
                     let datetime_str: String = row.get("created_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
                 updated_at: {
                     let datetime_str: String = row.get("updated_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
             }
         }).collect();
@@ -442,6 +371,7 @@ impl Database {
         Ok(row.is_some())
     }
 
+pub async fn update_transaction(        &self,        id: String,        account_id: String,        category_id: String,        amount: f64,        description: String,        transaction_type: String,        date: DateTime<Utc>,    ) -> Result<Transaction, sqlx::Error> {        let now = Utc::now();        sqlx::query(            r#"            UPDATE transactions            SET account_id = ?, category_id = ?, amount = ?, description = ?,                transaction_type = ?, date = ?, updated_at = ?            WHERE id = ?            "#        )        .bind(&account_id)        .bind(&category_id)        .bind(amount)        .bind(&description)        .bind(&transaction_type)        .bind(date.to_rfc3339())        .bind(now.to_rfc3339())        .bind(&id)        .execute(&self.pool)        .await?;        let row = sqlx::query("SELECT * FROM transactions WHERE id = ?")            .bind(&id)            .fetch_one(&self.pool)            .await?;        Ok(Transaction {            id: row.get("id"),            account_id: row.get("account_id"),            category_id: row.get("category_id"),            amount: row.get("amount"),            description: row.get("description"),            transaction_type: row.get("transaction_type"),            date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),            created_at: {                let datetime_str: String = row.get("created_at");                chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")                    .unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc())                    .and_utc()            },            updated_at: {                let datetime_str: String = row.get("updated_at");                chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")                    .unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc())                    .and_utc()            },        })    }
     pub async fn get_transactions_by_month(&self, year: i32, month: i32) -> Result<Vec<Transaction>, sqlx::Error> {
         let start_date = format!("{:04}-{:02}-01T00:00:00Z", year, month);
         let end_date = if month == 12 {
@@ -469,11 +399,11 @@ impl Database {
                 date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),
                 created_at: {
                     let datetime_str: String = row.get("created_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
                 updated_at: {
                     let datetime_str: String = row.get("updated_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
             }
         }).collect();
@@ -481,6 +411,7 @@ impl Database {
         Ok(transactions)
     }
 
+pub async fn update_transaction(        &self,        id: String,        account_id: String,        category_id: String,        amount: f64,        description: String,        transaction_type: String,        date: DateTime<Utc>,    ) -> Result<Transaction, sqlx::Error> {        let now = Utc::now();        sqlx::query(            r#"            UPDATE transactions            SET account_id = ?, category_id = ?, amount = ?, description = ?,                transaction_type = ?, date = ?, updated_at = ?            WHERE id = ?            "#        )        .bind(&account_id)        .bind(&category_id)        .bind(amount)        .bind(&description)        .bind(&transaction_type)        .bind(date.to_rfc3339())        .bind(now.to_rfc3339())        .bind(&id)        .execute(&self.pool)        .await?;        let row = sqlx::query("SELECT * FROM transactions WHERE id = ?")            .bind(&id)            .fetch_one(&self.pool)            .await?;        Ok(Transaction {            id: row.get("id"),            account_id: row.get("account_id"),            category_id: row.get("category_id"),            amount: row.get("amount"),            description: row.get("description"),            transaction_type: row.get("transaction_type"),            date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),            created_at: {                let datetime_str: String = row.get("created_at");                chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")                    .unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc())                    .and_utc()            },            updated_at: {                let datetime_str: String = row.get("updated_at");                chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")                    .unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc())                    .and_utc()            },        })    }
     pub async fn get_transactions_by_account(&self, account_id: String) -> Result<Vec<Transaction>, sqlx::Error> {
         let rows = sqlx::query(
             "SELECT * FROM transactions WHERE account_id = ? ORDER BY date DESC, created_at DESC"
@@ -500,11 +431,11 @@ impl Database {
                 date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),
                 created_at: {
                     let datetime_str: String = row.get("created_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
                 updated_at: {
                     let datetime_str: String = row.get("updated_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
             }
         }).collect();
@@ -512,6 +443,7 @@ impl Database {
         Ok(transactions)
     }
 
+pub async fn update_transaction(        &self,        id: String,        account_id: String,        category_id: String,        amount: f64,        description: String,        transaction_type: String,        date: DateTime<Utc>,    ) -> Result<Transaction, sqlx::Error> {        let now = Utc::now();        sqlx::query(            r#"            UPDATE transactions            SET account_id = ?, category_id = ?, amount = ?, description = ?,                transaction_type = ?, date = ?, updated_at = ?            WHERE id = ?            "#        )        .bind(&account_id)        .bind(&category_id)        .bind(amount)        .bind(&description)        .bind(&transaction_type)        .bind(date.to_rfc3339())        .bind(now.to_rfc3339())        .bind(&id)        .execute(&self.pool)        .await?;        let row = sqlx::query("SELECT * FROM transactions WHERE id = ?")            .bind(&id)            .fetch_one(&self.pool)            .await?;        Ok(Transaction {            id: row.get("id"),            account_id: row.get("account_id"),            category_id: row.get("category_id"),            amount: row.get("amount"),            description: row.get("description"),            transaction_type: row.get("transaction_type"),            date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),            created_at: {                let datetime_str: String = row.get("created_at");                chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")                    .unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc())                    .and_utc()            },            updated_at: {                let datetime_str: String = row.get("updated_at");                chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")                    .unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc())                    .and_utc()            },        })    }
     pub async fn get_transactions_by_category(&self, category_id: String) -> Result<Vec<Transaction>, sqlx::Error> {
         let rows = sqlx::query(
             "SELECT * FROM transactions WHERE category_id = ? ORDER BY date DESC, created_at DESC"
@@ -531,11 +463,11 @@ impl Database {
                 date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),
                 created_at: {
                     let datetime_str: String = row.get("created_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
                 updated_at: {
                     let datetime_str: String = row.get("updated_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
             }
         }).collect();
@@ -543,6 +475,7 @@ impl Database {
         Ok(transactions)
     }
 
+pub async fn update_transaction(        &self,        id: String,        account_id: String,        category_id: String,        amount: f64,        description: String,        transaction_type: String,        date: DateTime<Utc>,    ) -> Result<Transaction, sqlx::Error> {        let now = Utc::now();        sqlx::query(            r#"            UPDATE transactions            SET account_id = ?, category_id = ?, amount = ?, description = ?,                transaction_type = ?, date = ?, updated_at = ?            WHERE id = ?            "#        )        .bind(&account_id)        .bind(&category_id)        .bind(amount)        .bind(&description)        .bind(&transaction_type)        .bind(date.to_rfc3339())        .bind(now.to_rfc3339())        .bind(&id)        .execute(&self.pool)        .await?;        let row = sqlx::query("SELECT * FROM transactions WHERE id = ?")            .bind(&id)            .fetch_one(&self.pool)            .await?;        Ok(Transaction {            id: row.get("id"),            account_id: row.get("account_id"),            category_id: row.get("category_id"),            amount: row.get("amount"),            description: row.get("description"),            transaction_type: row.get("transaction_type"),            date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),            created_at: {                let datetime_str: String = row.get("created_at");                chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")                    .unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc())                    .and_utc()            },            updated_at: {                let datetime_str: String = row.get("updated_at");                chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")                    .unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc())                    .and_utc()            },        })    }
     pub async fn get_transactions_by_date_range(&self, start_date: String, end_date: String) -> Result<Vec<Transaction>, sqlx::Error> {
         let rows = sqlx::query(
             "SELECT * FROM transactions WHERE date >= ? AND date <= ? ORDER BY date DESC, created_at DESC"
@@ -563,11 +496,11 @@ impl Database {
                 date: DateTime::parse_from_rfc3339(&row.get::<String, _>("date")).unwrap().with_timezone(&Utc),
                 created_at: {
                     let datetime_str: String = row.get("created_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
                 updated_at: {
                     let datetime_str: String = row.get("updated_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
             }
         }).collect();
@@ -576,129 +509,6 @@ impl Database {
     }
 
     // Category operations
-    pub async fn create_category(
-        &self,
-        name: String,
-        icon: String,
-        category_type: String,
-        color: String,
-    ) -> Result<Category, sqlx::Error> {
-        // Check if category name already exists for this type
-        let existing = sqlx::query(
-            "SELECT id FROM categories WHERE name = ? AND category_type = ?"
-        )
-        .bind(&name)
-        .bind(&category_type)
-        .fetch_optional(&self.pool)
-        .await?;
-
-        if existing.is_some() {
-            return Err(sqlx::Error::RowNotFound);
-        }
-
-        let id = Uuid::new_v4().to_string();
-        let now = Utc::now();
-
-        sqlx::query(
-            r#"
-            INSERT INTO categories (id, name, color, icon, category_type, created_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-            "#
-        )
-        .bind(&id)
-        .bind(&name)
-        .bind(&color)
-        .bind(&icon)
-        .bind(&category_type)
-        .bind(now.to_rfc3339())
-        .execute(&self.pool)
-        .await?;
-
-        Ok(Category {
-            id,
-            name,
-            color,
-            icon,
-            category_type,
-            created_at: now,
-        })
-    }
-
-    pub async fn update_category(
-        &self,
-        id: String,
-        name: String,
-        icon: String,
-        category_type: String,
-        color: String,
-    ) -> Result<Category, sqlx::Error> {
-        // Check if category name already exists for this type (excluding current category)
-        let existing = sqlx::query(
-            "SELECT id FROM categories WHERE name = ? AND category_type = ? AND id != ?"
-        )
-        .bind(&name)
-        .bind(&category_type)
-        .bind(&id)
-        .fetch_optional(&self.pool)
-        .await?;
-
-        if existing.is_some() {
-            return Err(sqlx::Error::RowNotFound);
-        }
-
-        sqlx::query(
-            "UPDATE categories SET name = ?, color = ?, icon = ?, category_type = ? WHERE id = ?"
-        )
-        .bind(&name)
-        .bind(&color)
-        .bind(&icon)
-        .bind(&category_type)
-        .bind(&id)
-        .execute(&self.pool)
-        .await?;
-
-        // Return the updated category
-        let row = sqlx::query("SELECT * FROM categories WHERE id = ?")
-            .bind(&id)
-            .fetch_one(&self.pool)
-            .await?;
-
-        Ok(Category {
-            id: row.get("id"),
-            name: row.get("name"),
-            color: row.get("color"),
-            icon: row.get("icon"),
-            category_type: row.get("category_type"),
-            created_at: {
-                let datetime_str: String = row.get("created_at");
-                chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S")
-                    .unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap())
-                    .and_utc()
-            },
-        })
-    }
-
-    pub async fn delete_category(&self, id: String) -> Result<(), sqlx::Error> {
-        // Check if category is being used in any transactions
-        let transaction_count: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM transactions WHERE category_id = ?"
-        )
-        .bind(&id)
-        .fetch_one(&self.pool)
-        .await?;
-
-        if transaction_count > 0 {
-            return Err(sqlx::Error::RowNotFound);
-        }
-
-        sqlx::query("DELETE FROM categories WHERE id = ?")
-            .bind(&id)
-            .execute(&self.pool)
-            .await?;
-
-        Ok(())
-    }
-
     pub async fn get_categories(&self) -> Result<Vec<Category>, sqlx::Error> {
         let rows = sqlx::query("SELECT * FROM categories ORDER BY category_type, name")
             .fetch_all(&self.pool)
@@ -713,7 +523,7 @@ impl Database {
                 category_type: row.get("category_type"),
                 created_at: {
                     let datetime_str: String = row.get("created_at");
-                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::DateTime::from_timestamp(0, 0).unwrap().naive_utc()).and_utc()
                 },
             }
         }).collect();

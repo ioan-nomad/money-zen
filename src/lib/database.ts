@@ -147,4 +147,38 @@ export class Database {
   static async getCategories(): Promise<Category[]> {
     return await invoke('get_categories');
   }
+
+  static async createCategory(
+    name: string,
+    icon: string,
+    categoryType: 'income' | 'expense',
+    color: string = '#3B82F6'
+  ): Promise<Category> {
+    return await invoke('create_category', {
+      name,
+      icon,
+      categoryType,
+      color,
+    });
+  }
+
+  static async updateCategory(
+    id: string,
+    name: string,
+    icon: string,
+    categoryType: 'income' | 'expense',
+    color: string
+  ): Promise<Category> {
+    return await invoke('update_category', {
+      id,
+      name,
+      icon,
+      categoryType,
+      color,
+    });
+  }
+
+  static async deleteCategory(id: string): Promise<void> {
+    await invoke('delete_category', { id });
+  }
 }

@@ -1,0 +1,360 @@
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import { Database, type Category } from './database';
+
+  let categories: Category[] = [];
+  let error = '';
+
+  // Create modal state
+  let showCreateModal = false;
+  let createName = '';
+  let createIcon = '💰';
+  let createType: 'income' | 'expense' = 'expense';
+  let createColor = '#3B82F6';
+
+  // Edit modal state
+  let showEditModal = false;
+  let editCategory: Category | null = null;
+  let editName = '';
+  let editIcon = '';
+  let editType: 'income' | 'expense' = 'expense';
+  let editColor = '';
+
+  // Delete confirmation state
+  let showDeleteModal = false;
+  let deleteCategoryId = '';
+  let deleteCategoryName = '';
+
+  // Grouped categories
+  $: incomeCategories = categories.filter(cat => cat.category_type === 'income');
+  $: expenseCategories = categories.filter(cat => cat.category_type === 'expense');
+
+  onMount(async () => {
+    await loadCategories();
+  });
+
+  async function loadCategories() {
+    try {
+      categories = await Database.getCategories();
+    } catch (err) {
+      error = String(err);
+    }
+  }
+
+  function openCreateModal() {
+    createName = '';
+    createIcon = '💰';
+    createType = 'expense';
+    createColor = '#3B82F6';
+    showCreateModal = true;
+  }
+
+  async function saveCreate() {
+    if (!createName || !createIcon) return;
+
+    try {
+      await Database.createCategory(createName, createIcon, createType, createColor);
+      showCreateModal = false;
+      await loadCategories();
+    } catch (err) {
+      error = String(err);
+    }
+  }
+
+  function handleEdit(category: Category) {
+    editCategory = category;
+    editName = category.name;
+    editIcon = category.icon;
+    editType = category.category_type;
+    editColor = category.color;
+    showEditModal = true;
+  }
+
+  async function saveEdit() {
+    if (!editCategory || !editName || !editIcon) return;
+
+    try {
+      await Database.updateCategory(editCategory.id, editName, editIcon, editType, editColor);
+      showEditModal = false;
+      await loadCategories();
+    } catch (err) {
+      error = String(err);
+    }
+  }
+
+  function handleDelete(categoryId: string, categoryName: string) {
+    deleteCategoryId = categoryId;
+    deleteCategoryName = categoryName;
+    showDeleteModal = true;
+  }
+
+  async function confirmDelete() {
+    try {
+      await Database.deleteCategory(deleteCategoryId);
+      showDeleteModal = false;
+      await loadCategories();
+    } catch (err) {
+      error = String(err);
+    }
+  }
+
+  // Common icon options
+  const iconOptions = [
+    '🍔', '🚗', '🏠', '👕', '🎬', '💊', '📚', '⚡', '📱', '🛒',
+    '💼', '💸', '🎁', '💰', '🏆', '📈', '💡', '🎯', '🔧', '🎨'
+  ];
+
+  // Common color options
+  const colorOptions = [
+    '#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6',
+    '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#6366F1'
+  ];
+</script>
+
+<div class="max-w-4xl mx-auto p-6">
+  {#if error}
+    <div class="alert alert-error mb-6">
+      <span>Error: {error}</span>
+    </div>
+  {/if}
+
+  <!-- Header with Create Button -->
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold">Categories</h1>
+    <button class="btn btn-primary" on:click={openCreateModal}>
+      ➕ Create Category
+    </button>
+  </div>
+
+  <!-- Income Categories -->
+  <div class="card bg-base-100 shadow-xl mb-6">
+    <div class="card-body">
+      <h2 class="card-title text-success">💰 Income Categories ({incomeCategories.length})</h2>
+
+      <div class="space-y-2">
+        {#if incomeCategories.length === 0}
+          <div class="text-center py-4 text-base-content/50">
+            No income categories found.
+          </div>
+        {:else}
+          {#each incomeCategories as category}
+            <div class="flex items-center gap-2">
+              <div class="flex-1">
+                <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg hover:bg-base-300 transition-colors">
+                  <div class="flex items-center gap-3">
+                    <div class="text-2xl">{category.icon}</div>
+                    <div>
+                      <span class="font-semibold text-base-content">{category.name}</span>
+                      <div class="w-4 h-4 rounded-full inline-block ml-2" style="background-color: {category.color}"></div>
+                    </div>
+                  </div>
+                  <div class="badge badge-success">income</div>
+                </div>
+              </div>
+              <button
+                class="btn btn-sm btn-ghost"
+                on:click={() => handleEdit(category)}
+                title="Edit category"
+              >
+                ✏️
+              </button>
+              <button
+                class="btn btn-sm btn-error"
+                on:click={() => handleDelete(category.id, category.name)}
+                title="Delete category"
+              >
+                🗑️
+              </button>
+            </div>
+          {/each}
+        {/if}
+      </div>
+    </div>
+  </div>
+
+  <!-- Expense Categories -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <h2 class="card-title text-error">💸 Expense Categories ({expenseCategories.length})</h2>
+
+      <div class="space-y-2">
+        {#if expenseCategories.length === 0}
+          <div class="text-center py-4 text-base-content/50">
+            No expense categories found.
+          </div>
+        {:else}
+          {#each expenseCategories as category}
+            <div class="flex items-center gap-2">
+              <div class="flex-1">
+                <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg hover:bg-base-300 transition-colors">
+                  <div class="flex items-center gap-3">
+                    <div class="text-2xl">{category.icon}</div>
+                    <div>
+                      <span class="font-semibold text-base-content">{category.name}</span>
+                      <div class="w-4 h-4 rounded-full inline-block ml-2" style="background-color: {category.color}"></div>
+                    </div>
+                  </div>
+                  <div class="badge badge-error">expense</div>
+                </div>
+              </div>
+              <button
+                class="btn btn-sm btn-ghost"
+                on:click={() => handleEdit(category)}
+                title="Edit category"
+              >
+                ✏️
+              </button>
+              <button
+                class="btn btn-sm btn-error"
+                on:click={() => handleDelete(category.id, category.name)}
+                title="Delete category"
+              >
+                🗑️
+              </button>
+            </div>
+          {/each}
+        {/if}
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Modal -->
+  {#if showCreateModal}
+    <div class="modal modal-open">
+      <div class="modal-box">
+        <h3 class="font-bold text-lg mb-4">Create New Category</h3>
+
+        <div class="form-control mb-3">
+          <label class="label" for="create-name"><span class="label-text">Category Name</span></label>
+          <input id="create-name" type="text" class="input input-bordered" bind:value={createName} placeholder="Enter category name" />
+        </div>
+
+        <div class="form-control mb-3">
+          <label class="label" for="create-type"><span class="label-text">Category Type</span></label>
+          <select id="create-type" class="select select-bordered" bind:value={createType}>
+            <option value="expense">Expense</option>
+            <option value="income">Income</option>
+          </select>
+        </div>
+
+        <div class="form-control mb-3">
+          <label class="label"><span class="label-text">Icon</span></label>
+          <div class="flex flex-wrap gap-2 mb-2">
+            {#each iconOptions as icon}
+              <button
+                type="button"
+                class="btn btn-sm"
+                class:btn-primary={createIcon === icon}
+                class:btn-ghost={createIcon !== icon}
+                on:click={() => createIcon = icon}
+              >
+                {icon}
+              </button>
+            {/each}
+          </div>
+          <input type="text" class="input input-bordered input-sm" bind:value={createIcon} placeholder="Or enter custom emoji" />
+        </div>
+
+        <div class="form-control mb-4">
+          <label class="label"><span class="label-text">Color</span></label>
+          <div class="flex flex-wrap gap-2 mb-2">
+            {#each colorOptions as color}
+              <button
+                type="button"
+                class="w-8 h-8 rounded-full border-2"
+                class:border-base-content={createColor === color}
+                class:border-base-300={createColor !== color}
+                style="background-color: {color}"
+                on:click={() => createColor = color}
+              ></button>
+            {/each}
+          </div>
+          <input type="color" class="input input-bordered input-sm w-20" bind:value={createColor} />
+        </div>
+
+        <div class="modal-action">
+          <button class="btn" on:click={() => showCreateModal = false}>Cancel</button>
+          <button class="btn btn-primary" on:click={saveCreate} disabled={!createName || !createIcon}>Create</button>
+        </div>
+      </div>
+    </div>
+  {/if}
+
+  <!-- Edit Modal -->
+  {#if showEditModal}
+    <div class="modal modal-open">
+      <div class="modal-box">
+        <h3 class="font-bold text-lg mb-4">Edit Category</h3>
+
+        <div class="form-control mb-3">
+          <label class="label" for="edit-name"><span class="label-text">Category Name</span></label>
+          <input id="edit-name" type="text" class="input input-bordered" bind:value={editName} />
+        </div>
+
+        <div class="form-control mb-3">
+          <label class="label" for="edit-type"><span class="label-text">Category Type</span></label>
+          <select id="edit-type" class="select select-bordered" bind:value={editType}>
+            <option value="expense">Expense</option>
+            <option value="income">Income</option>
+          </select>
+        </div>
+
+        <div class="form-control mb-3">
+          <label class="label"><span class="label-text">Icon</span></label>
+          <div class="flex flex-wrap gap-2 mb-2">
+            {#each iconOptions as icon}
+              <button
+                type="button"
+                class="btn btn-sm"
+                class:btn-primary={editIcon === icon}
+                class:btn-ghost={editIcon !== icon}
+                on:click={() => editIcon = icon}
+              >
+                {icon}
+              </button>
+            {/each}
+          </div>
+          <input type="text" class="input input-bordered input-sm" bind:value={editIcon} placeholder="Or enter custom emoji" />
+        </div>
+
+        <div class="form-control mb-4">
+          <label class="label"><span class="label-text">Color</span></label>
+          <div class="flex flex-wrap gap-2 mb-2">
+            {#each colorOptions as color}
+              <button
+                type="button"
+                class="w-8 h-8 rounded-full border-2"
+                class:border-base-content={editColor === color}
+                class:border-base-300={editColor !== color}
+                style="background-color: {color}"
+                on:click={() => editColor = color}
+              ></button>
+            {/each}
+          </div>
+          <input type="color" class="input input-bordered input-sm w-20" bind:value={editColor} />
+        </div>
+
+        <div class="modal-action">
+          <button class="btn" on:click={() => showEditModal = false}>Cancel</button>
+          <button class="btn btn-primary" on:click={saveEdit} disabled={!editName || !editIcon}>Save</button>
+        </div>
+      </div>
+    </div>
+  {/if}
+
+  <!-- Delete Confirmation Modal -->
+  {#if showDeleteModal}
+    <div class="modal modal-open">
+      <div class="modal-box">
+        <h3 class="font-bold text-lg mb-4">Delete Category</h3>
+        <p class="mb-4">Are you sure you want to delete "<strong>{deleteCategoryName}</strong>"?</p>
+        <p class="mb-4 text-warning">⚠️ This action cannot be undone. The category cannot be deleted if there are transactions using it.</p>
+
+        <div class="modal-action">
+          <button class="btn" on:click={() => showDeleteModal = false}>Cancel</button>
+          <button class="btn btn-error" on:click={confirmDelete}>Delete</button>
+        </div>
+      </div>
+    </div>
+  {/if}
+</div>

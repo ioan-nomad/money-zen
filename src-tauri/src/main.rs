@@ -319,6 +319,40 @@ async fn get_categories(db: State<'_, DatabaseState>) -> Result<Vec<Category>, S
 }
 
 #[tauri::command]
+async fn create_category(
+    db: State<'_, DatabaseState>,
+    name: String,
+    icon: String,
+    category_type: String,
+    color: String,
+) -> Result<Category, String> {
+    let db = db.lock().await;
+    db.create_category(name, icon, category_type, color).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn update_category(
+    db: State<'_, DatabaseState>,
+    id: String,
+    name: String,
+    icon: String,
+    category_type: String,
+    color: String,
+) -> Result<Category, String> {
+    let db = db.lock().await;
+    db.update_category(id, name, icon, category_type, color).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn delete_category(
+    db: State<'_, DatabaseState>,
+    id: String,
+) -> Result<(), String> {
+    let db = db.lock().await;
+    db.delete_category(id).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 async fn migrate_nomad_categories(
     db: State<'_, DatabaseState>
 ) -> Result<String, String> {
@@ -381,6 +415,9 @@ async fn main() {
             get_transactions_by_category,
             get_transactions_by_date_range,
             get_categories,
+            create_category,
+            update_category,
+            delete_category,
             migrate_nomad_categories
         ])
         .run(tauri::generate_context!())
