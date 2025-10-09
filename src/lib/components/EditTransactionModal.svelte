@@ -1,12 +1,15 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
-  import type { Transaction, Account, Category } from '../database';
+  import { createEventDispatcher, onMount } from 'svelte';
+  import type { Transaction, Account, Category, Tag } from '../database';
+  import { Database } from '../database';
   import GroupedAccountDropdown from './GroupedAccountDropdown.svelte';
   import GroupedCategoryDropdown from './GroupedCategoryDropdown.svelte';
+  import TagPicker from './TagPicker.svelte';
 
   export let transaction: Transaction;
   export let accounts: Account[] = [];
   export let categories: Category[] = [];
+  export let tags: Tag[] = [];
   export let onUpdate: (
     id: string,
     accountId: string,
@@ -27,9 +30,22 @@
   let description = transaction.description;
   let dateInput = transaction.date.split('T')[0]; // For date input display
   let timeString = transaction.date.split('T')[1] || '00:00:00Z'; // Preserve original time
+  let selectedTagIds: string[] = [];
+  let originalTagIds: string[] = [];
 
   // Filter categories based on transaction type
   $: filteredCategories = categories.filter(c => c.category_type === transactionType);
+
+  onMount(async () => {
+    // Load existing tags for this transaction
+    try {
+      const existingTags = await Database.getTransactionTags(transaction.id);
+      originalTagIds = existingTags.map(tag => tag.id);
+      selectedTagIds = [...originalTagIds];
+    } catch (error) {
+      console.error('Failed to load transaction tags:', error);
+    }
+  });
 
   async function handleSubmit() {
     if (!selectedAccountId || !selectedCategoryId || amount <= 0 || !description.trim()) {
@@ -38,6 +54,7 @@
 
     const fullDate = `${dateInput}T${timeString}`;
 
+    // Update the transaction first
     await onUpdate(
       transaction.id,
       selectedAccountId,
@@ -48,7 +65,31 @@
       fullDate
     );
 
+    // Handle tag updates separately
+    await updateTransactionTags();
+
     dispatch('close');
+  }
+
+  async function updateTransactionTags() {
+    // Find tags to add and remove
+    const tagsToAdd = selectedTagIds.filter(id => !originalTagIds.includes(id));
+    const tagsToRemove = originalTagIds.filter(id => !selectedTagIds.includes(id));
+
+    try {
+      if (tagsToRemove.length > 0) {
+        await Database.removeTagsFromTransaction(transaction.id, tagsToRemove);
+      }
+      if (tagsToAdd.length > 0) {
+        await Database.addTagsToTransaction(transaction.id, tagsToAdd);
+      }
+    } catch (error) {
+      console.error('Failed to update transaction tags:', error);
+    }
+  }
+
+  function handleTagChange(event: CustomEvent) {
+    selectedTagIds = event.detail.selectedTagIds;
   }
 
   function handleClose() {
@@ -147,6 +188,19 @@
             placeholder="Transaction description"
             class="input input-bordered"
             bind:value={description}
+          />
+        </div>
+
+        <!-- Tags (Full Width) -->
+        <div class="form-control md:col-span-2">
+          <label class="label">
+            <span class="label-text">Tags (optional)</span>
+          </label>
+          <TagPicker
+            {tags}
+            {selectedTagIds}
+            placeholder="Select tags to organize this transaction..."
+            on:change={handleTagChange}
           />
         </div>
       </div>

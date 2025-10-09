@@ -20,6 +20,14 @@ export interface Category {
   created_at: string;
 }
 
+export interface Tag {
+  id: string;
+  name: string;
+  color: string;
+  icon: string;
+  created_at: string;
+}
+
 export interface Transaction {
   id: string;
   account_id: string;
@@ -180,5 +188,63 @@ export class Database {
 
   static async deleteCategory(id: string): Promise<void> {
     await invoke('delete_category', { id });
+  }
+
+  // Tag operations
+  static async getTags(): Promise<Tag[]> {
+    return await invoke('get_tags');
+  }
+
+  static async createTag(
+    name: string,
+    icon: string,
+    color: string = '#8B5CF6'
+  ): Promise<Tag> {
+    return await invoke('create_tag', {
+      name,
+      icon,
+      color,
+    });
+  }
+
+  static async updateTag(
+    id: string,
+    name: string,
+    icon: string,
+    color: string
+  ): Promise<Tag> {
+    return await invoke('update_tag', {
+      id,
+      name,
+      icon,
+      color,
+    });
+  }
+
+  static async deleteTag(id: string): Promise<void> {
+    await invoke('delete_tag', { id });
+  }
+
+  // Transaction-Tag relationship operations
+  static async addTagsToTransaction(transactionId: string, tagIds: string[]): Promise<void> {
+    await invoke('add_tags_to_transaction', {
+      transactionId,
+      tagIds,
+    });
+  }
+
+  static async removeTagsFromTransaction(transactionId: string, tagIds: string[]): Promise<void> {
+    await invoke('remove_tags_from_transaction', {
+      transactionId,
+      tagIds,
+    });
+  }
+
+  static async getTransactionTags(transactionId: string): Promise<Tag[]> {
+    return await invoke('get_transaction_tags', { transactionId });
+  }
+
+  static async getTransactionsByTag(tagId: string): Promise<Transaction[]> {
+    return await invoke('get_transactions_by_tag', { tagId });
   }
 }

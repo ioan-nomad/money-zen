@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Database, type Transaction, type Category, type Account } from './database';
+  import { Database, type Transaction, type Category, type Account, type Tag } from './database';
   import jsPDF from 'jspdf';
   import autoTable from 'jspdf-autotable';
 
@@ -8,6 +8,7 @@
   let filteredTransactions: Transaction[] = [];
   let categories: Category[] = [];
   let accounts: Account[] = [];
+  let tags: Tag[] = [];
   let error = '';
 
   // Report filter state
@@ -23,6 +24,10 @@
   let totalIncome = 0;
   let totalExpense = 0;
   let spendingByCategory: { name: string; amount: number; color: string }[] = [];
+  let spendingByTag: { name: string; amount: number; color: string; icon: string; count: number }[] = [];
+  let topUsedTags: { name: string; icon: string; color: string; count: number; totalAmount: number }[] = [];
+  let tagCombinations: { tags: string[]; count: number; totalAmount: number }[] = [];
+  let tagTrends: { month: string; tagData: { tagName: string; amount: number }[] }[] = [];
   let transactionCount = 0;
 
   onMount(async () => {
@@ -34,6 +39,7 @@
       transactions = await Database.getTransactions();
       categories = await Database.getCategories();
       accounts = await Database.getAccounts();
+      tags = await Database.getTags();
       await applyFilters();
     } catch (err) {
       error = String(err);
@@ -73,13 +79,13 @@
         default:
           filteredTransactions = transactions;
       }
-      calculateAnalytics();
+      await calculateAnalytics();
     } catch (err) {
       error = String(err);
     }
   }
 
-  function calculateAnalytics() {
+  async function calculateAnalytics() {
     transactionCount = filteredTransactions.length;
 
     totalIncome = filteredTransactions
@@ -110,6 +116,149 @@
       })
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 5); // Top 5
+
+    // Calculate tag analytics
+    await calculateTagAnalytics();
+  }
+
+  async function calculateTagAnalytics() {
+    try {
+      // Build a map of transaction tags for all filtered transactions
+      const transactionTagsMap = new Map<string, Tag[]>();
+      for (const transaction of filteredTransactions) {
+        const transactionTags = await Database.getTransactionTags(transaction.id);
+        transactionTagsMap.set(transaction.id, transactionTags);
+      }
+
+      // Calculate spending by tag
+      const tagAmountMap = new Map<string, { amount: number; count: number }>();
+      filteredTransactions
+        .filter(t => t.transaction_type === 'expense')
+        .forEach(t => {
+          const transactionTags = transactionTagsMap.get(t.id) || [];
+          transactionTags.forEach(tag => {
+            const current = tagAmountMap.get(tag.id) || { amount: 0, count: 0 };
+            tagAmountMap.set(tag.id, {
+              amount: current.amount + t.amount,
+              count: current.count + 1
+            });
+          });
+        });
+
+      spendingByTag = Array.from(tagAmountMap.entries())
+        .map(([tagId, data]) => {
+          const tag = tags.find(t => t.id === tagId);
+          return {
+            name: tag ? tag.name : 'Unknown',
+            amount: data.amount,
+            color: tag?.color || '#666',
+            icon: tag?.icon || '🏷️',
+            count: data.count
+          };
+        })
+        .sort((a, b) => b.amount - a.amount)
+        .slice(0, 5);
+
+      // Calculate top used tags (by frequency)
+      const tagUsageMap = new Map<string, { count: number; totalAmount: number }>();
+      filteredTransactions.forEach(t => {
+        const transactionTags = transactionTagsMap.get(t.id) || [];
+        transactionTags.forEach(tag => {
+          const current = tagUsageMap.get(tag.id) || { count: 0, totalAmount: 0 };
+          tagUsageMap.set(tag.id, {
+            count: current.count + 1,
+            totalAmount: current.totalAmount + (t.transaction_type === 'expense' ? t.amount : 0)
+          });
+        });
+      });
+
+      topUsedTags = Array.from(tagUsageMap.entries())
+        .map(([tagId, data]) => {
+          const tag = tags.find(t => t.id === tagId);
+          return {
+            name: tag ? tag.name : 'Unknown',
+            icon: tag?.icon || '🏷️',
+            color: tag?.color || '#666',
+            count: data.count,
+            totalAmount: data.totalAmount
+          };
+        })
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+
+      // Calculate tag combinations
+      const combinationMap = new Map<string, { count: number; totalAmount: number }>();
+      filteredTransactions.forEach(t => {
+        const transactionTags = transactionTagsMap.get(t.id) || [];
+        if (transactionTags.length >= 2) {
+          // Sort tags by name for consistent combination keys
+          const sortedTagNames = transactionTags
+            .map(tag => tag.name)
+            .sort();
+
+          // Create combinations of 2 tags
+          for (let i = 0; i < sortedTagNames.length; i++) {
+            for (let j = i + 1; j < sortedTagNames.length; j++) {
+              const combo = `${sortedTagNames[i]} + ${sortedTagNames[j]}`;
+              const current = combinationMap.get(combo) || { count: 0, totalAmount: 0 };
+              combinationMap.set(combo, {
+                count: current.count + 1,
+                totalAmount: current.totalAmount + (t.transaction_type === 'expense' ? t.amount : 0)
+              });
+            }
+          }
+        }
+      });
+
+      tagCombinations = Array.from(combinationMap.entries())
+        .map(([combo, data]) => ({
+          tags: combo.split(' + '),
+          count: data.count,
+          totalAmount: data.totalAmount
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+
+      // Calculate tag trends over time (last 6 months)
+      const now = new Date();
+      const monthlyTagData = new Map<string, Map<string, number>>();
+
+      for (let i = 5; i >= 0; i--) {
+        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+        monthlyTagData.set(monthKey, new Map());
+      }
+
+      filteredTransactions
+        .filter(t => t.transaction_type === 'expense')
+        .forEach(t => {
+          const transactionDate = new Date(t.date);
+          const monthKey = `${transactionDate.getFullYear()}-${(transactionDate.getMonth() + 1).toString().padStart(2, '0')}`;
+
+          if (monthlyTagData.has(monthKey)) {
+            const transactionTags = transactionTagsMap.get(t.id) || [];
+            const monthData = monthlyTagData.get(monthKey)!;
+
+            transactionTags.forEach(tag => {
+              const current = monthData.get(tag.name) || 0;
+              monthData.set(tag.name, current + t.amount);
+            });
+          }
+        });
+
+      tagTrends = Array.from(monthlyTagData.entries())
+        .map(([month, tagData]) => ({
+          month,
+          tagData: Array.from(tagData.entries())
+            .map(([tagName, amount]) => ({ tagName, amount }))
+            .sort((a, b) => b.amount - a.amount)
+            .slice(0, 3) // Top 3 tags per month
+        }))
+        .filter(trend => trend.tagData.length > 0);
+
+    } catch (err) {
+      console.error('Error calculating tag analytics:', err);
+    }
   }
 
   function stripEmoji(text: string): string {
@@ -194,6 +343,38 @@
         ]),
         styles: { fontSize: 9, cellPadding: 2 },
         headStyles: { fillColor: [239, 68, 68], textColor: [255, 255, 255] }
+      });
+    }
+
+    // Top spending tags
+    if (spendingByTag.length > 0) {
+      doc.text('Top Spending Tags', 14, doc.lastAutoTable.finalY + 15);
+      autoTable(doc, {
+        startY: doc.lastAutoTable.finalY + 20,
+        head: [['Tag', 'Amount', 'Uses']],
+        body: spendingByTag.map(t => [
+          stripEmoji(removeDiacritics(t.name)),
+          formatAmount(t.amount),
+          `${t.count} times`
+        ]),
+        styles: { fontSize: 9, cellPadding: 2 },
+        headStyles: { fillColor: [34, 197, 94], textColor: [255, 255, 255] }
+      });
+    }
+
+    // Tag combinations
+    if (tagCombinations.length > 0) {
+      doc.text('Popular Tag Combinations', 14, doc.lastAutoTable.finalY + 15);
+      autoTable(doc, {
+        startY: doc.lastAutoTable.finalY + 20,
+        head: [['Tag Combination', 'Frequency', 'Total Amount']],
+        body: tagCombinations.slice(0, 3).map(c => [
+          removeDiacritics(c.tags.join(' + ')),
+          `${c.count} times`,
+          formatAmount(c.totalAmount)
+        ]),
+        styles: { fontSize: 9, cellPadding: 2 },
+        headStyles: { fillColor: [168, 85, 247], textColor: [255, 255, 255] }
       });
     }
 
@@ -405,14 +586,187 @@
               <span>{category.name}</span>
               <span class="font-bold">{category.amount.toFixed(2)} RON</span>
             </div>
-            <progress 
-              class="progress progress-primary w-full" 
-              value={category.amount} 
+            <progress
+              class="progress progress-primary w-full"
+              value={category.amount}
               max={spendingByCategory[0]?.amount || 1}
             ></progress>
           </div>
         {/each}
       </div>
+    </div>
+  </div>
+
+  <!-- Tag Analytics Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Spending by Tag -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title">💸 Spending by Tag</h2>
+        <div class="space-y-3">
+          {#each spendingByTag as tag}
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <span class="flex items-center gap-2">
+                  <span style="color: {tag.color}">{tag.icon}</span>
+                  <span>{tag.name}</span>
+                  <span class="badge badge-sm">{tag.count} times</span>
+                </span>
+                <span class="font-bold">{tag.amount.toFixed(2)} RON</span>
+              </div>
+              <progress
+                class="progress w-full"
+                style="--progress-color: {tag.color}"
+                value={tag.amount}
+                max={spendingByTag[0]?.amount || 1}
+              ></progress>
+            </div>
+          {:else}
+            <p class="text-gray-500 italic">No tag data available for the selected period.</p>
+          {/each}
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Used Tags -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title">🏆 Most Used Tags</h2>
+        <div class="space-y-3">
+          {#each topUsedTags as tag}
+            <div class="flex justify-between items-center p-3 bg-base-200 rounded-lg">
+              <div class="flex items-center gap-3">
+                <span style="color: {tag.color}" class="text-2xl">{tag.icon}</span>
+                <div>
+                  <div class="font-semibold">{tag.name}</div>
+                  <div class="text-sm text-gray-500">
+                    {tag.totalAmount.toFixed(2)} RON total
+                  </div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-lg font-bold text-primary">{tag.count}</div>
+                <div class="text-xs text-gray-500">uses</div>
+              </div>
+            </div>
+          {:else}
+            <p class="text-gray-500 italic">No tag usage data available.</p>
+          {/each}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tag Combinations -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <h2 class="card-title">🔗 Tag Combination Insights</h2>
+      <div class="overflow-x-auto">
+        <table class="table table-zebra">
+          <thead>
+            <tr>
+              <th>Tag Combination</th>
+              <th>Frequency</th>
+              <th>Total Spent</th>
+              <th>Avg per Transaction</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each tagCombinations as combo}
+              <tr>
+                <td>
+                  <div class="flex items-center gap-2">
+                    {#each combo.tags as tag, index}
+                      <span class="badge badge-outline">{tag}</span>
+                      {#if index < combo.tags.length - 1}
+                        <span class="text-gray-400">+</span>
+                      {/if}
+                    {/each}
+                  </div>
+                </td>
+                <td>
+                  <span class="badge badge-primary">{combo.count} times</span>
+                </td>
+                <td class="font-mono">{combo.totalAmount.toFixed(2)} RON</td>
+                <td class="font-mono">{(combo.totalAmount / combo.count).toFixed(2)} RON</td>
+              </tr>
+            {:else}
+              <tr>
+                <td colspan="4" class="text-center text-gray-500 italic">
+                  No tag combinations found. Try adding multiple tags to transactions!
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tag Trends Over Time -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <h2 class="card-title">📈 Tag Trends Over Time (Last 6 Months)</h2>
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Top Tags</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each tagTrends as trend}
+              <tr>
+                <td class="font-semibold">{trend.month}</td>
+                <td>
+                  <div class="flex flex-wrap gap-2">
+                    {#each trend.tagData as tagData}
+                      <div class="badge badge-outline">
+                        {tagData.tagName}: {tagData.amount.toFixed(0)} RON
+                      </div>
+                    {/each}
+                  </div>
+                </td>
+                <td class="font-mono">
+                  {trend.tagData.reduce((sum, tag) => sum + tag.amount, 0).toFixed(2)} RON
+                </td>
+              </tr>
+            {:else}
+              <tr>
+                <td colspan="3" class="text-center text-gray-500 italic">
+                  No tag trend data available for the selected period.
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Simple visual trend indicator -->
+      {#if tagTrends.length > 0}
+        <div class="mt-4">
+          <h3 class="text-lg font-semibold mb-2">Monthly Trend</h3>
+          <div class="flex items-end gap-2 h-20">
+            {#each tagTrends as trend}
+              {@const total = trend.tagData.reduce((sum, tag) => sum + tag.amount, 0)}
+              {@const maxTotal = Math.max(...tagTrends.map(t => t.tagData.reduce((sum, tag) => sum + tag.amount, 0)))}
+              {@const height = maxTotal > 0 ? (total / maxTotal) * 100 : 0}
+              <div class="flex flex-col items-center gap-1 flex-1">
+                <div
+                  class="w-full bg-primary rounded-t"
+                  style="height: {height}%"
+                  title="{trend.month}: {total.toFixed(2)} RON"
+                ></div>
+                <span class="text-xs text-gray-500 transform rotate-45 origin-left">
+                  {trend.month}
+                </span>
+              </div>
+            {/each}
+          </div>
+        </div>
+      {/if}
     </div>
   </div>
 </div>

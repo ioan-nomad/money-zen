@@ -27,6 +27,15 @@ pub struct Category {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Tag {
+    pub id: String,
+    pub name: String,
+    pub color: String,
+    pub icon: String,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Transaction {
     pub id: String,
     pub account_id: String,
@@ -107,6 +116,37 @@ impl Database {
                 updated_at TEXT NOT NULL,
                 FOREIGN KEY (account_id) REFERENCES accounts (id) ON DELETE CASCADE,
                 FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE RESTRICT
+            )
+            "#
+        )
+        .execute(&self.pool)
+        .await?;
+
+        // Create tags table
+        sqlx::query(
+            r#"
+            CREATE TABLE IF NOT EXISTS tags (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL UNIQUE,
+                color TEXT NOT NULL DEFAULT '#8B5CF6',
+                icon TEXT NOT NULL DEFAULT '🏷️',
+                created_at TEXT NOT NULL
+            )
+            "#
+        )
+        .execute(&self.pool)
+        .await?;
+
+        // Create transaction-tags junction table
+        sqlx::query(
+            r#"
+            CREATE TABLE IF NOT EXISTS transaction_tags (
+                transaction_id TEXT NOT NULL,
+                tag_id TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                PRIMARY KEY (transaction_id, tag_id),
+                FOREIGN KEY (transaction_id) REFERENCES transactions (id) ON DELETE CASCADE,
+                FOREIGN KEY (tag_id) REFERENCES tags (id) ON DELETE CASCADE
             )
             "#
         )
@@ -720,6 +760,242 @@ impl Database {
 
         Ok(categories)
     }
+
+    // Tag CRUD operations
+    pub async fn create_tag(
+        &self,
+        name: String,
+        icon: String,
+        color: String,
+    ) -> Result<Tag, sqlx::Error> {
+        // Check if tag name already exists
+        let existing = sqlx::query(
+            "SELECT id FROM tags WHERE name = ?"
+        )
+        .bind(&name)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        if existing.is_some() {
+            return Err(sqlx::Error::RowNotFound);
+        }
+
+        let id = Uuid::new_v4().to_string();
+        let now = Utc::now();
+
+        sqlx::query(
+            r#"
+            INSERT INTO tags (id, name, color, icon, created_at)
+            VALUES (?, ?, ?, ?, ?)
+            "#
+        )
+        .bind(&id)
+        .bind(&name)
+        .bind(&color)
+        .bind(&icon)
+        .bind(now.to_rfc3339())
+        .execute(&self.pool)
+        .await?;
+
+        Ok(Tag {
+            id,
+            name,
+            color,
+            icon,
+            created_at: now,
+        })
+    }
+
+    pub async fn update_tag(
+        &self,
+        id: String,
+        name: String,
+        icon: String,
+        color: String,
+    ) -> Result<Tag, sqlx::Error> {
+        // Check if tag name already exists (excluding current tag)
+        let existing = sqlx::query(
+            "SELECT id FROM tags WHERE name = ? AND id != ?"
+        )
+        .bind(&name)
+        .bind(&id)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        if existing.is_some() {
+            return Err(sqlx::Error::RowNotFound);
+        }
+
+        sqlx::query(
+            r#"
+            UPDATE tags
+            SET name = ?, color = ?, icon = ?
+            WHERE id = ?
+            "#
+        )
+        .bind(&name)
+        .bind(&color)
+        .bind(&icon)
+        .bind(&id)
+        .execute(&self.pool)
+        .await?;
+
+        let updated_at = Utc::now();
+
+        Ok(Tag {
+            id,
+            name,
+            color,
+            icon,
+            created_at: updated_at, // Note: we don't track updated_at for tags, so using current time
+        })
+    }
+
+    pub async fn delete_tag(&self, id: String) -> Result<(), sqlx::Error> {
+        // Check if tag is being used in any transactions
+        let transaction_count: i64 = sqlx::query_scalar(
+            "SELECT COUNT(*) FROM transaction_tags WHERE tag_id = ?"
+        )
+        .bind(&id)
+        .fetch_one(&self.pool)
+        .await?;
+
+        if transaction_count > 0 {
+            return Err(sqlx::Error::RowNotFound);
+        }
+
+        sqlx::query("DELETE FROM tags WHERE id = ?")
+            .bind(&id)
+            .execute(&self.pool)
+            .await?;
+
+        Ok(())
+    }
+
+    pub async fn get_tags(&self) -> Result<Vec<Tag>, sqlx::Error> {
+        let rows = sqlx::query("SELECT * FROM tags ORDER BY name")
+            .fetch_all(&self.pool)
+            .await?;
+
+        let tags = rows.into_iter().map(|row| {
+            Tag {
+                id: row.get("id"),
+                name: row.get("name"),
+                color: row.get("color"),
+                icon: row.get("icon"),
+                created_at: {
+                    let datetime_str: String = row.get("created_at");
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                },
+            }
+        }).collect();
+
+        Ok(tags)
+    }
+
+    // Transaction-Tag relationship functions
+    pub async fn add_tags_to_transaction(&self, transaction_id: String, tag_ids: Vec<String>) -> Result<(), sqlx::Error> {
+        let now = Utc::now();
+
+        for tag_id in tag_ids {
+            sqlx::query(
+                r#"
+                INSERT OR IGNORE INTO transaction_tags (transaction_id, tag_id, created_at)
+                VALUES (?, ?, ?)
+                "#
+            )
+            .bind(&transaction_id)
+            .bind(&tag_id)
+            .bind(now.to_rfc3339())
+            .execute(&self.pool)
+            .await?;
+        }
+
+        Ok(())
+    }
+
+    pub async fn remove_tags_from_transaction(&self, transaction_id: String, tag_ids: Vec<String>) -> Result<(), sqlx::Error> {
+        for tag_id in tag_ids {
+            sqlx::query(
+                "DELETE FROM transaction_tags WHERE transaction_id = ? AND tag_id = ?"
+            )
+            .bind(&transaction_id)
+            .bind(&tag_id)
+            .execute(&self.pool)
+            .await?;
+        }
+
+        Ok(())
+    }
+
+    pub async fn get_transaction_tags(&self, transaction_id: String) -> Result<Vec<Tag>, sqlx::Error> {
+        let rows = sqlx::query(
+            r#"
+            SELECT t.* FROM tags t
+            INNER JOIN transaction_tags tt ON t.id = tt.tag_id
+            WHERE tt.transaction_id = ?
+            ORDER BY t.name
+            "#
+        )
+        .bind(&transaction_id)
+        .fetch_all(&self.pool)
+        .await?;
+
+        let tags = rows.into_iter().map(|row| {
+            Tag {
+                id: row.get("id"),
+                name: row.get("name"),
+                color: row.get("color"),
+                icon: row.get("icon"),
+                created_at: {
+                    let datetime_str: String = row.get("created_at");
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                },
+            }
+        }).collect();
+
+        Ok(tags)
+    }
+
+    pub async fn get_transactions_by_tag(&self, tag_id: String) -> Result<Vec<Transaction>, sqlx::Error> {
+        let rows = sqlx::query(
+            r#"
+            SELECT tr.* FROM transactions tr
+            INNER JOIN transaction_tags tt ON tr.id = tt.transaction_id
+            WHERE tt.tag_id = ?
+            ORDER BY tr.date DESC, tr.created_at DESC
+            "#
+        )
+        .bind(&tag_id)
+        .fetch_all(&self.pool)
+        .await?;
+
+        let transactions = rows.into_iter().map(|row| {
+            Transaction {
+                id: row.get("id"),
+                account_id: row.get("account_id"),
+                category_id: row.get("category_id"),
+                amount: row.get("amount"),
+                description: row.get("description"),
+                transaction_type: row.get("transaction_type"),
+                date: {
+                    let date_str: String = row.get("date");
+                    chrono::NaiveDateTime::parse_from_str(&date_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                },
+                created_at: {
+                    let datetime_str: String = row.get("created_at");
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                },
+                updated_at: {
+                    let datetime_str: String = row.get("updated_at");
+                    chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap_or_else(|_| chrono::NaiveDateTime::from_timestamp_opt(0, 0).unwrap()).and_utc()
+                },
+            }
+        }).collect();
+
+        Ok(transactions)
+    }
+
     // Migration functions
     async fn run_migrations(&self) -> Result<(), sqlx::Error> {
         self.add_owner_column_to_accounts().await?;

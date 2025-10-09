@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
-  import type { Transaction, Account, Category } from '../database';
+  import { createEventDispatcher, onMount } from 'svelte';
+  import type { Transaction, Account, Category, Tag } from '../database';
   import { formatCurrency, formatDate } from '../utils';
   import EditTransactionModal from './EditTransactionModal.svelte';
   import { Database } from '../database';
@@ -8,16 +8,31 @@
   export let transaction: Transaction;
   export let accounts: Account[] = [];
   export let categories: Category[] = [];
+  export let tags: Tag[] = [];
 
   const dispatch = createEventDispatcher();
 
   let expanded = false;
   let showDeleteConfirm = false;
   let showEditModal = false;
+  let transactionTags: Tag[] = [];
 
   // Helper functions
   $: account = accounts.find(a => a.id === transaction.account_id);
   $: category = categories.find(c => c.id === transaction.category_id);
+
+  onMount(async () => {
+    await loadTransactionTags();
+  });
+
+  async function loadTransactionTags() {
+    try {
+      transactionTags = await Database.getTransactionTags(transaction.id);
+    } catch (error) {
+      console.error('Failed to load transaction tags:', error);
+      transactionTags = [];
+    }
+  }
 
   function toggleExpand() {
     expanded = !expanded;
@@ -63,6 +78,10 @@
 
       // Update local transaction data
       transaction = updatedTransaction;
+
+      // Reload tags after update (EditTransactionModal handles tag updates)
+      await loadTransactionTags();
+
       showEditModal = false;
     } catch (error) {
       console.error('Failed to update transaction:', error);
@@ -87,7 +106,23 @@
     >
       {transaction.transaction_type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
     </span>
-    <span class="flex-1 px-4 text-base-content">{transaction.description}</span>
+    <div class="flex-1 px-4">
+      <div class="text-base-content">{transaction.description}</div>
+      {#if transactionTags.length > 0}
+        <div class="flex flex-wrap gap-1 mt-1">
+          {#each transactionTags as tag}
+            <span
+              class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-white"
+              style="background-color: {tag.color}"
+              title="Tag: {tag.name}"
+            >
+              <span>{tag.icon}</span>
+              <span>{tag.name}</span>
+            </span>
+          {/each}
+        </div>
+      {/if}
+    </div>
     <span class="text-sm opacity-70 min-w-[100px] text-right">{formatDate(transaction.date)}</span>
 
     <!-- Expand/Collapse Icon -->
@@ -153,6 +188,7 @@
     {transaction}
     {accounts}
     {categories}
+    {tags}
     onUpdate={handleUpdate}
     on:close={() => showEditModal = false}
   />

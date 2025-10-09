@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Database, type Account, type Transaction } from './database';
+  import { Database, type Account, type Transaction, type Tag } from './database';
   import AccountCard from './components/AccountCard.svelte';
   import TransactionItem from './components/TransactionItem.svelte';
   import AddTransactionForm from './components/AddTransactionForm.svelte';
@@ -8,6 +8,7 @@
   let accounts: Account[] = [];
   let transactions: Transaction[] = [];
   let categories = [];
+  let tags: Tag[] = [];
   let error = '';
 
   onMount(async () => {
@@ -19,6 +20,7 @@
       accounts = await Database.getAccounts();
       transactions = await Database.getTransactions();
       categories = await Database.getCategories();
+      tags = await Database.getTags();
     } catch (err) {
       error = String(err);
     }
@@ -30,15 +32,22 @@
     amount: number;
     description: string;
     type: 'income' | 'expense';
+    tagIds: string[];
   }) {
     try {
-      await Database.createTransaction(
+      const transaction = await Database.createTransaction(
         data.accountId,
         data.categoryId,
         data.amount,
         data.description,
         data.type
       );
+
+      // Add tags to the transaction if any were selected
+      if (data.tagIds.length > 0) {
+        await Database.addTagsToTransaction(transaction.id, data.tagIds);
+      }
+
       await loadData();
     } catch (err) {
       error = String(err);
@@ -78,12 +87,12 @@
         <h2 class="card-title">Recent Transactions</h2>
         <div class="space-y-2">
           {#each recentTransactions as transaction}
-            <TransactionItem {transaction} {accounts} {categories} />
+            <TransactionItem {transaction} {accounts} {categories} {tags} />
           {/each}
         </div>
       </div>
     </div>
   </div>
 
-  <AddTransactionForm {accounts} {categories} onSubmit={handleTransactionSubmit} />
+  <AddTransactionForm {accounts} {categories} {tags} onSubmit={handleTransactionSubmit} />
 </div>

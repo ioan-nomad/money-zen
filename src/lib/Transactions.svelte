@@ -1,11 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Database, type Transaction, type Account, type Category } from './database';
+  import { Database, type Transaction, type Account, type Category, type Tag } from './database';
   import TransactionList from './components/TransactionList.svelte';
 
   let transactions: Transaction[] = [];
   let accounts: Account[] = [];
   let categories: Category[] = [];
+  let tags: Tag[] = [];
   let error = '';
 
   onMount(async () => {
@@ -17,6 +18,7 @@
       transactions = await Database.getTransactions();
       accounts = await Database.getAccounts();
       categories = await Database.getCategories();
+      tags = await Database.getTags();
     } catch (err) {
       error = String(err);
     }
@@ -30,5 +32,5 @@
     </div>
   {/if}
 
-  <TransactionList {transactions} {accounts} {categories} />
+  <TransactionList {transactions} {accounts} {categories} {tags} />
 </div>

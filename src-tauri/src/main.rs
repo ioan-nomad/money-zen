@@ -7,7 +7,7 @@ mod migrate_categories;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tauri::{State, Manager};
-use database::{Database, Account, Transaction, Category};
+use database::{Database, Account, Transaction, Category, Tag};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
@@ -352,6 +352,86 @@ async fn delete_category(
     db.delete_category(id).await.map_err(|e| e.to_string())
 }
 
+// Tag commands
+#[tauri::command]
+async fn create_tag(
+    db: State<'_, DatabaseState>,
+    name: String,
+    icon: String,
+    color: String,
+) -> Result<Tag, String> {
+    let db = db.lock().await;
+    db.create_tag(name, icon, color).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn update_tag(
+    db: State<'_, DatabaseState>,
+    id: String,
+    name: String,
+    icon: String,
+    color: String,
+) -> Result<Tag, String> {
+    let db = db.lock().await;
+    db.update_tag(id, name, icon, color).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn delete_tag(
+    db: State<'_, DatabaseState>,
+    id: String,
+) -> Result<(), String> {
+    let db = db.lock().await;
+    db.delete_tag(id).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn get_tags(
+    db: State<'_, DatabaseState>,
+) -> Result<Vec<Tag>, String> {
+    let db = db.lock().await;
+    db.get_tags().await.map_err(|e| e.to_string())
+}
+
+// Transaction-Tag relationship commands
+#[tauri::command]
+async fn add_tags_to_transaction(
+    db: State<'_, DatabaseState>,
+    transaction_id: String,
+    tag_ids: Vec<String>,
+) -> Result<(), String> {
+    let db = db.lock().await;
+    db.add_tags_to_transaction(transaction_id, tag_ids).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn remove_tags_from_transaction(
+    db: State<'_, DatabaseState>,
+    transaction_id: String,
+    tag_ids: Vec<String>,
+) -> Result<(), String> {
+    let db = db.lock().await;
+    db.remove_tags_from_transaction(transaction_id, tag_ids).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn get_transaction_tags(
+    db: State<'_, DatabaseState>,
+    transaction_id: String,
+) -> Result<Vec<Tag>, String> {
+    let db = db.lock().await;
+    db.get_transaction_tags(transaction_id).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn get_transactions_by_tag(
+    db: State<'_, DatabaseState>,
+    tag_id: String,
+) -> Result<Vec<Transaction>, String> {
+    let db = db.lock().await;
+    db.get_transactions_by_tag(tag_id).await.map_err(|e| e.to_string())
+}
+
 #[tauri::command]
 async fn migrate_nomad_categories(
     db: State<'_, DatabaseState>
@@ -418,6 +498,14 @@ async fn main() {
             create_category,
             update_category,
             delete_category,
+            get_tags,
+            create_tag,
+            update_tag,
+            delete_tag,
+            add_tags_to_transaction,
+            remove_tags_from_transaction,
+            get_transaction_tags,
+            get_transactions_by_tag,
             migrate_nomad_categories
         ])
         .run(tauri::generate_context!())

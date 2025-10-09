@@ -7,10 +7,11 @@
   import Analytics from './lib/Analytics.svelte'
   import Import from './lib/Import.svelte'
   import Categories from './lib/Categories.svelte'
+  import Tags from './lib/Tags.svelte'
 
   let greetMsg = ''
   let name = ''
-  let currentView: 'welcome' | 'dashboard' | 'transactions' | 'accounts' | 'categories' | 'analytics' | 'import' | 'test' = 'dashboard'
+  let currentView: 'welcome' | 'dashboard' | 'transactions' | 'accounts' | 'categories' | 'tags' | 'analytics' | 'import' | 'test' = 'dashboard'
 
   async function greet() {
     greetMsg = await invoke('greet', { name })
@@ -54,6 +55,13 @@
       </button>
       <button
         class="tab tab-lg"
+        class:tab-active={currentView === 'tags'}
+        on:click={() => currentView = 'tags'}
+      >
+        🏷️ Tags
+      </button>
+      <button
+        class="tab tab-lg"
         class:tab-active={currentView === 'analytics'}
         on:click={() => currentView = 'analytics'}
       >
@@ -90,6 +98,8 @@
       <Accounts />
     {:else if currentView === 'categories'}
       <Categories />
+    {:else if currentView === 'tags'}
+      <Tags />
     {:else if currentView === 'analytics'}
       <Analytics />
     {:else if currentView === 'import'}
