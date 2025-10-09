@@ -190,7 +190,8 @@ async fn batch_insert_transactions(
                     tx.amount,
                     tx.description,
                     tx.transaction_type,
-                    date
+                    date,
+                    None
                 ).await {
                     Ok(_) => {
                         inserted += 1;
@@ -225,13 +226,14 @@ async fn create_transaction(
     description: String,
     transaction_type: String,
     date: String,
+    tag_ids: Option<Vec<String>>,
 ) -> Result<Transaction, String> {
     let db = db.lock().await;
     let parsed_date = DateTime::parse_from_rfc3339(&date)
         .map_err(|e| format!("Invalid date format: {}", e))?
         .with_timezone(&Utc);
 
-    db.create_transaction(account_id, category_id, amount, description, transaction_type, parsed_date)
+    db.create_transaction(account_id, category_id, amount, description, transaction_type, parsed_date, tag_ids)
         .await
         .map_err(|e| e.to_string())
 }

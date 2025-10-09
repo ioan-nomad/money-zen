@@ -322,6 +322,7 @@ impl Database {
         description: String,
         transaction_type: String,
         date: DateTime<Utc>,
+        tag_ids: Option<Vec<String>>,
     ) -> Result<Transaction, sqlx::Error> {
         let id = Uuid::new_v4().to_string();
         let now = Utc::now();
@@ -355,6 +356,13 @@ impl Database {
         .bind(&account_id)
         .execute(&self.pool)
         .await?;
+
+        // Add tags if provided
+        if let Some(tag_ids) = tag_ids {
+            if !tag_ids.is_empty() {
+                self.add_tags_to_transaction(id.clone(), tag_ids).await?;
+            }
+        }
 
         Ok(Transaction {
             id,
