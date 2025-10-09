@@ -1,3 +1,13 @@
+## MoneyZen Architecture Documentation
+
+### Current Status (October 9, 2025)
+- ✅ **Phase 1:** Database Separation & Fixes (100% Complete)
+- ✅ **Phase 2:** Categories & Accounts System (100% Complete)
+- ✅ **Phase 3:** Tags System & Advanced Filtering (100% Complete)
+- 🚧 **Phase 4:** Enhanced Transaction Management (Next Priority)
+
+---
+
 ## DATABASE ARCHITECTURE UPDATE (October 8, 2025)
 
 ### Database Separation
@@ -122,4 +132,206 @@ Fixed `from_timestamp_opt()` deprecation warnings:
 
 #### Latest Commits
 - `3ebdb2c` - feat: Add owner column and N-OMAD accounts
-- 🔄 **Current:** Fixing deprecation warnings in datetime parsing
+- `02ede9d` - feat: implement complete tags system with analytics
+
+---
+
+## Phase 3: Tags System Architecture (COMPLETED - Oct 9, 2025)
+
+### Overview
+Complete tags infrastructure for organizing and analyzing transactions with flexible filtering and analytics.
+
+### Database Schema
+
+#### Tags Table
+```sql
+CREATE TABLE tags (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    color TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+)
+```
+
+#### Transaction_Tags Junction Table
+```sql
+CREATE TABLE transaction_tags (
+    id INTEGER PRIMARY KEY,
+    transaction_id INTEGER NOT NULL,
+    tag_id INTEGER NOT NULL,
+    FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE,
+    UNIQUE(transaction_id, tag_id)
+)
+```
+
+### Components Architecture
+
+#### 1. Tags.svelte (Main Tags Page)
+**Purpose:** Tag management interface
+**Features:**
+- List all tags with color indicators
+- Create new tags with TagForm
+- Edit existing tags
+- Delete tags with confirmation
+- Usage statistics per tag
+
+**State Management:** Local state with reactive updates
+**Database Calls:** get_tags, delete_tag
+
+#### 2. TagForm.svelte (Tag Create/Edit Form)
+**Purpose:** Form for creating and editing tags
+**Features:**
+- Name input validation
+- HEX color picker (#RRGGBB format)
+- Create/Update mode support
+- Form validation with error messages
+
+**Props:**
+- `tag` (optional): Tag object for editing
+- `onSave`: Callback after successful save
+- `onCancel`: Callback for cancel action
+
+**Database Calls:** create_tag, update_tag
+
+#### 3. TagPicker.svelte (Tag Selection Component)
+**Purpose:** Interactive tag selector for transactions
+**Features:**
+- Search tags by name
+- Multi-select with checkboxes
+- Visual feedback for selected tags
+- Color-coded tag badges
+- Dropdown interface with smooth animations
+
+**Props:**
+- `selectedTagIds`: Array of currently selected tag IDs
+- `onTagsChange`: Callback when selection changes
+
+**State:** Local tags list, search filter, open/close state
+
+#### 4. AdvancedFilters.svelte (Comprehensive Filtering)
+**Purpose:** Advanced transaction filtering interface
+**Features:**
+- **Search:** Description text search
+- **Accounts:** Multi-select account filtering
+- **Categories:** Multi-select category filtering (Income/Expense grouped)
+- **Transaction Type:** All/Income/Expense dropdown
+- **Tags:** Tag selection with OR/AND logic toggle
+- **Date Range:** Start/End date pickers
+- **Amount Range:** Min/Max amount inputs with current range display
+- **Apply & Close:** Apply filters and close modal
+- **Clear All:** Reset all filters
+
+**Props:**
+- `filters`: Current filter state object
+- `onApplyFilters`: Callback with new filter state
+
+**Filter State Structure:**
+```typescript
+{
+  searchTerm: string
+  selectedAccounts: number[]
+  selectedCategories: number[]
+  transactionType: 'all' | 'income' | 'expense'
+  selectedTags: number[]
+  tagFilterMode: 'OR' | 'AND'
+  startDate: string | null
+  endDate: string | null
+  minAmount: number | null
+  maxAmount: number | null
+}
+```
+
+### Integration Points
+
+#### AddTransactionForm.svelte
+- **Integration:** TagPicker component
+- **Feature:** Select tags when creating transactions
+- **Database:** Stores tag associations in transaction_tags table
+
+#### EditTransactionModal.svelte
+- **Integration:** TagPicker component
+- **Feature:** Modify tags on existing transactions
+- **Database:** Updates transaction_tags associations
+
+#### TransactionItem.svelte & TransactionList.svelte
+- **Integration:** Display tag badges
+- **Feature:** Visual tag indicators with colors
+- **Props:** Receives tags array from parent
+
+#### Analytics.svelte
+**New Features:**
+- **Spending by Tag:** Chart showing expenses grouped by tag
+- **Most Used Tags:** Top tags by usage count
+- **Tag Combination Insights:** Frequently used tag combinations
+- **Tag Trends Over Time:** Monthly tag usage over last 6 months
+
+**Database Queries:**
+- get_spending_by_tag
+- get_most_used_tags
+- get_tag_combinations
+- get_tag_trends
+
+### Rust Backend (database.rs)
+
+#### New Commands
+- `get_tags()`: Retrieve all tags
+- `create_tag(name, color)`: Create new tag
+- `update_tag(id, name, color)`: Update existing tag
+- `delete_tag(id)`: Delete tag and associations
+- `get_spending_by_tag(start_date, end_date)`: Analytics query
+- `get_most_used_tags(start_date, end_date)`: Analytics query
+- `get_tag_combinations(start_date, end_date)`: Analytics query
+- `get_tag_trends(months)`: Analytics query
+
+#### Transaction Tag Management
+- Automatic handling of transaction_tags associations
+- Cascade delete on tag removal
+- Unique constraint on transaction-tag pairs
+
+### TypeScript Interfaces (database.ts)
+```typescript
+export interface Tag {
+  id: number
+  name: string
+  color: string
+  created_at: string
+  updated_at: string
+}
+
+export interface TransactionTag {
+  id: number
+  transaction_id: number
+  tag_id: number
+}
+```
+
+### Filtering Logic
+
+#### Tag Filtering Modes
+- **OR Mode:** Show transactions with ANY selected tag
+- **AND Mode:** Show transactions with ALL selected tags
+
+#### Filter Application
+- Filters are combinable (accounts + categories + tags + dates + amounts)
+- Each filter type is applied independently
+- Final result is intersection of all filter results
+
+### Performance Considerations
+- **Indexed Queries:** Tags and transaction_tags have indexed foreign keys
+- **Efficient Joins:** SQLite queries use proper JOIN operations
+- **Client-Side Caching:** Tags loaded once and cached in components
+- **Reactive Updates:** Svelte reactivity ensures UI updates efficiently
+
+### User Experience
+- **Smooth Animations:** All modals and dropdowns have transitions
+- **Visual Feedback:** Color-coded tags, hover effects, loading states
+- **Validation:** Real-time form validation with clear error messages
+- **Accessibility:** Proper ARIA labels and keyboard navigation
+
+### Commit Reference
+- **Commit:** 02ede9d
+- **Files Changed:** 15 (4 new, 11 modified)
+- **Lines Added:** 2,222
+- **Lines Removed:** 85
