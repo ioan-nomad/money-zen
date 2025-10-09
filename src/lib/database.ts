@@ -135,6 +135,18 @@ export class Database {
     return await invoke('delete_multiple_transactions', { transactionIds });
   }
 
+  static async bulkUpdateTransactionTags(
+    transactionIds: string[],
+    tagsToAdd: string[],
+    tagsToRemove: string[]
+  ): Promise<number> {
+    return await invoke('bulk_update_transaction_tags', {
+      transactionIds,
+      tagsToAdd,
+      tagsToRemove
+    });
+  }
+
   static async updateTransaction(
     id: string,
     accountId: string,

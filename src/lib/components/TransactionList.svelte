@@ -3,6 +3,10 @@
   import { Database } from '../database';
   import TransactionItem from './TransactionItem.svelte';
   import AdvancedFilters, { type TransactionFilters } from './AdvancedFilters.svelte';
+  import BulkTagEditorModal from './BulkTagEditorModal.svelte';
+  import { createEventDispatcher } from 'svelte';
+
+  const dispatch = createEventDispatcher();
 
   export let transactions: Transaction[];
   export let accounts: Account[] = [];
@@ -26,6 +30,8 @@
   let selectedTransactionIds: Set<string> = new Set();
   let selectAll = false;
   let showBulkDeleteModal = false;
+  let showBulkTagEditor = false;
+  let error = '';
 
   // Track transaction tags for filtering
   let transactionTagsMap = new Map<string, string[]>();
@@ -200,8 +206,31 @@
   }
 
   function openBulkTagEditor() {
-    // TODO: Implement bulk tag editor modal
-    console.log('Open bulk tag editor for:', Array.from(selectedTransactionIds));
+    if (selectedTransactionIds.size === 0) return;
+    showBulkTagEditor = true;
+  }
+
+  async function handleBulkTagUpdate(tagsToAdd: string[], tagsToRemove: string[]) {
+    try {
+      const idsArray = Array.from(selectedTransactionIds);
+      const updatedCount = await Database.bulkUpdateTransactionTags(
+        idsArray,
+        tagsToAdd,
+        tagsToRemove
+      );
+
+      showBulkTagEditor = false;
+      selectedTransactionIds = new Set();
+      selectAll = false;
+
+      // Trigger parent to reload transactions
+      dispatch('refresh');
+
+      console.log(`Successfully updated tags for ${updatedCount} transactions`);
+    } catch (err) {
+      error = String(err);
+      console.error('Bulk tag update failed:', err);
+    }
   }
 </script>
 
@@ -324,4 +353,14 @@
       </div>
     </div>
   </div>
+{/if}
+
+<!-- Bulk Tag Editor Modal -->
+{#if showBulkTagEditor}
+  <BulkTagEditorModal
+    transactionCount={selectedTransactionIds.size}
+    {tags}
+    onUpdate={handleBulkTagUpdate}
+    on:close={() => showBulkTagEditor = false}
+  />
 {/if}
