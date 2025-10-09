@@ -2,6 +2,8 @@
   import { createEventDispatcher } from 'svelte';
   import type { Transaction, Account, Category } from '../database';
   import { formatCurrency, formatDate } from '../utils';
+  import EditTransactionModal from './EditTransactionModal.svelte';
+  import { Database } from '../database';
 
   export let transaction: Transaction;
   export let accounts: Account[] = [];
@@ -11,6 +13,7 @@
 
   let expanded = false;
   let showDeleteConfirm = false;
+  let showEditModal = false;
 
   // Helper functions
   $: account = accounts.find(a => a.id === transaction.account_id);
@@ -32,6 +35,39 @@
 
   function cancelDelete() {
     showDeleteConfirm = false;
+  }
+
+  function handleEdit() {
+    showEditModal = true;
+  }
+
+  async function handleUpdate(
+    id: string,
+    accountId: string,
+    categoryId: string,
+    amount: number,
+    description: string,
+    transactionType: 'income' | 'expense',
+    date: string
+  ) {
+    try {
+      const updatedTransaction = await Database.updateTransaction(
+        id,
+        accountId,
+        categoryId,
+        amount,
+        description,
+        transactionType,
+        date
+      );
+
+      // Update local transaction data
+      transaction = updatedTransaction;
+      showEditModal = false;
+    } catch (error) {
+      console.error('Failed to update transaction:', error);
+      alert('Eroare la actualizarea tranzacției. Încearcă din nou.');
+    }
   }
 </script>
 
@@ -86,6 +122,9 @@
       <!-- Action Buttons -->
       {#if !showDeleteConfirm}
         <div class="flex gap-2 pt-2">
+          <button class="btn btn-sm btn-primary" on:click={handleEdit}>
+            ✏️ Edit
+          </button>
           <button class="btn btn-sm btn-error" on:click={handleDelete}>
             🗑️ Delete
           </button>
@@ -107,6 +146,17 @@
     </div>
   {/if}
 </div>
+
+<!-- Edit Modal -->
+{#if showEditModal}
+  <EditTransactionModal
+    {transaction}
+    {accounts}
+    {categories}
+    onUpdate={handleUpdate}
+    on:close={() => showEditModal = false}
+  />
+{/if}
 
 <style>
   @keyframes fade-in {

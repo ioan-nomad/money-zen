@@ -123,6 +123,26 @@ export class Database {
     await invoke('delete_transaction', { id });
   }
 
+  static async updateTransaction(
+    id: string,
+    accountId: string,
+    categoryId: string,
+    amount: number,
+    description: string,
+    transactionType: 'income' | 'expense',
+    date: string
+  ): Promise<Transaction> {
+    return await invoke('update_transaction', {
+      id,
+      accountId,
+      categoryId,
+      amount,
+      description,
+      transactionType,
+      date
+    });
+  }
+
   // Category operations
   static async getCategories(): Promise<Category[]> {
     return await invoke('get_categories');

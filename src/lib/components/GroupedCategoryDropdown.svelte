@@ -36,32 +36,34 @@
     }
   }
 
-  // Click outside handler with proper timing
+  // Click outside handler
   function handleClickOutside(event: MouseEvent) {
-    if (!containerRef) return;
+    if (!containerRef || !isOpen) return;
 
     const target = event.target as Node;
-
-    // Check if click is outside the container
-    if (!containerRef.contains(target) && isOpen) {
+    if (!containerRef.contains(target)) {
       isOpen = false;
     }
   }
 
-  // Setup click outside listener when dropdown opens
-  $: if (isOpen) {
-    // Small delay to avoid immediate close from toggle click
-    setTimeout(() => {
-      document.addEventListener('click', handleClickOutside);
-    }, 0);
-  } else {
-    document.removeEventListener('click', handleClickOutside);
+  // Reactive setup for click outside listener
+  $: if (typeof document !== 'undefined') {
+    if (isOpen) {
+      // Add listener on next tick to avoid immediate trigger
+      setTimeout(() => {
+        document.addEventListener('click', handleClickOutside);
+      }, 0);
+    } else {
+      document.removeEventListener('click', handleClickOutside);
+    }
   }
 
   // Cleanup on component destroy
   onMount(() => {
     return () => {
-      document.removeEventListener('click', handleClickOutside);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('click', handleClickOutside);
+      }
     };
   });
 </script>

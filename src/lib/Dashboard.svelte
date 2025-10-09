@@ -78,7 +78,7 @@
         <h2 class="card-title">Recent Transactions</h2>
         <div class="space-y-2">
           {#each recentTransactions as transaction}
-            <TransactionItem {transaction} />
+            <TransactionItem {transaction} {accounts} {categories} />
           {/each}
         </div>
       </div>
