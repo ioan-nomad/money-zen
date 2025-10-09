@@ -63,7 +63,8 @@
       "Bash(tasklist:*)",
       "Bash(powershell:*)",
       "Bash(git fetch:*)",
-      "Bash(rustc:*)"
+      "Bash(rustc:*)",
+      "Read(//c/Users/ciupe/Desktop/**)"
     ],
     "deny": [],
     "ask": []
