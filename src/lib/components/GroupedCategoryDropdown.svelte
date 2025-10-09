@@ -29,46 +29,31 @@
     isOpen = false; // Close dropdown after selection
   }
 
-  // Keyboard handler
-  function handleKeydown(event: KeyboardEvent) {
-    if (event.key === 'Escape' && isOpen) {
-      isOpen = false;
-    }
-  }
 
-  // Click outside handler
-  function handleClickOutside(event: MouseEvent) {
-    if (!containerRef || !isOpen) return;
-
-    const target = event.target as Node;
-    if (!containerRef.contains(target)) {
-      isOpen = false;
-    }
-  }
-
-  // Reactive setup for click outside listener
-  $: if (typeof document !== 'undefined') {
-    if (isOpen) {
-      // Add listener on next tick to avoid immediate trigger
-      setTimeout(() => {
-        document.addEventListener('click', handleClickOutside);
-      }, 0);
-    } else {
-      document.removeEventListener('click', handleClickOutside);
-    }
-  }
-
-  // Cleanup on component destroy
   onMount(() => {
-    return () => {
-      if (typeof document !== 'undefined') {
-        document.removeEventListener('click', handleClickOutside);
+    const handleClick = (event: MouseEvent) => {
+      if (containerRef && !containerRef.contains(event.target as Node) && isOpen) {
+        isOpen = false;
       }
+    };
+
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        isOpen = false;
+      }
+    };
+
+    // Use capture phase to catch clicks before they bubble
+    document.addEventListener('click', handleClick, true);
+    document.addEventListener('keydown', handleKeydown);
+
+    return () => {
+      document.removeEventListener('click', handleClick, true);
+      document.removeEventListener('keydown', handleKeydown);
     };
   });
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
 
 <!-- Toggle Button -->
 <div class="relative w-full" bind:this={containerRef}>
@@ -85,7 +70,7 @@
         <span class="text-gray-400">Select category...</span>
       {/if}
     </span>
-    <span class="text-lg">{isOpen ? '▲' : '▼'}</span>
+    <span class="text-sm opacity-60">▼</span>
   </button>
 
   <!-- Dropdown Panel -->
