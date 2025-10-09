@@ -10,6 +10,10 @@
   export let categories: Category[] = [];
   export let tags: Tag[] = [];
 
+  // Bulk selection props
+  export let isSelected: boolean = false;
+  export let onToggleSelection: ((id: string) => void) | null = null;
+
   const dispatch = createEventDispatcher();
 
   let expanded = false;
@@ -37,6 +41,13 @@
   function toggleExpand() {
     expanded = !expanded;
     showDeleteConfirm = false; // Reset confirmation when collapsing
+  }
+
+  function handleSelectionChange(event: Event) {
+    event.stopPropagation(); // Prevent triggering expand/collapse
+    if (onToggleSelection) {
+      onToggleSelection(transaction.id);
+    }
   }
 
   function handleDelete() {
@@ -99,6 +110,19 @@
     role="button"
     tabindex="0"
   >
+    <!-- Selection checkbox (if bulk selection is enabled) -->
+    {#if onToggleSelection}
+      <div class="flex items-center mr-3">
+        <input
+          type="checkbox"
+          class="checkbox checkbox-sm"
+          checked={isSelected}
+          on:change={handleSelectionChange}
+          on:click={(e) => e.stopPropagation()}
+        />
+      </div>
+    {/if}
+
     <span
       class="font-bold text-lg min-w-[120px]"
       class:text-success={transaction.transaction_type === 'income'}

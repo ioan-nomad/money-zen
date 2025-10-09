@@ -22,6 +22,10 @@
     amountMax: 10000
   };
 
+  // Bulk operations state
+  let selectedTransactionIds: Set<string> = new Set();
+  let selectAll = false;
+
   // Track transaction tags for filtering
   let transactionTagsMap = new Map<string, string[]>();
   let isLoadingTags = false;
@@ -141,6 +145,40 @@
       alert('Eroare la ștergerea tranzacției. Încearcă din nou.');
     }
   }
+
+  // Toggle individual transaction selection
+  function toggleSelection(transactionId: string) {
+    const newSelection = new Set(selectedTransactionIds);
+    if (newSelection.has(transactionId)) {
+      newSelection.delete(transactionId);
+    } else {
+      newSelection.add(transactionId);
+    }
+    selectedTransactionIds = newSelection;
+    selectAll = filteredTransactions.length > 0 && newSelection.size === filteredTransactions.length;
+  }
+
+  // Toggle select all
+  function toggleSelectAll() {
+    if (selectAll) {
+      selectedTransactionIds = new Set();
+      selectAll = false;
+    } else {
+      selectedTransactionIds = new Set(filteredTransactions.map(t => t.id));
+      selectAll = true;
+    }
+  }
+
+  // Bulk operations handlers (placeholder functions)
+  function handleBulkDelete() {
+    // TODO: Implement bulk delete confirmation dialog
+    console.log('Bulk delete:', Array.from(selectedTransactionIds));
+  }
+
+  function openBulkTagEditor() {
+    // TODO: Implement bulk tag editor modal
+    console.log('Open bulk tag editor for:', Array.from(selectedTransactionIds));
+  }
 </script>
 
 <div class="space-y-4">
@@ -155,14 +193,36 @@
   <!-- Transactions Card -->
   <div class="card bg-base-100 shadow-xl">
     <div class="card-body">
-      <h2 class="card-title">
-        All Transactions ({filteredTransactions.length})
-        {#if filteredTransactions.length !== transactions.length}
-          <span class="text-sm font-normal text-base-content/70">
-            of {transactions.length} total
-          </span>
+      <!-- Header with Bulk Operations Controls -->
+      <div class="flex justify-between items-center mb-4">
+        <div class="flex items-center gap-4">
+          <h2 class="text-2xl font-bold">Transaction History ({filteredTransactions.length})</h2>
+
+          {#if filteredTransactions.length > 0}
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                class="checkbox checkbox-sm"
+                checked={selectAll}
+                on:change={toggleSelectAll}
+              />
+              <span class="text-sm">Select All</span>
+            </label>
+          {/if}
+        </div>
+
+        {#if selectedTransactionIds.size > 0}
+          <div class="flex gap-2 items-center">
+            <span class="badge badge-primary">{selectedTransactionIds.size} selected</span>
+            <button class="btn btn-sm btn-error" on:click={handleBulkDelete}>
+              🗑️ Delete Selected
+            </button>
+            <button class="btn btn-sm btn-primary" on:click={openBulkTagEditor}>
+              🏷️ Edit Tags
+            </button>
+          </div>
         {/if}
-      </h2>
+      </div>
 
       <!-- Transactions List -->
       <div class="space-y-2">
@@ -202,6 +262,8 @@
               {accounts}
               {categories}
               {tags}
+              isSelected={selectedTransactionIds.has(transaction.id)}
+              onToggleSelection={toggleSelection}
               on:delete={handleDelete}
             />
           {/each}
