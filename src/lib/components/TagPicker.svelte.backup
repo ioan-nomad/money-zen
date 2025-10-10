@@ -1,8 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import type { Tag } from '$lib/types';
-  import { tagStore } from '$lib/stores';
+  import type { Tag } from '../database';
 
+  export let tags: Tag[] = [];
   export let selectedTagIds: string[] = [];
   export let disabled = false;
   export let placeholder = 'Select tags...';
@@ -16,12 +16,12 @@
   let tagPickerContainer: HTMLElement;
 
   // Filter tags based on search query
-  $: filteredTags = $tagStore.filter(tag =>
+  $: filteredTags = tags.filter(tag =>
     tag.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Get selected tags for display
-  $: selectedTags = $tagStore.filter(tag => selectedTagIds.includes(tag.id));
+  $: selectedTags = tags.filter(tag => selectedTagIds.includes(tag.id));
 
   function toggleTag(tagId: string) {
     if (disabled) return;

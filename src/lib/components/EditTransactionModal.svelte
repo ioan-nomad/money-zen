@@ -240,7 +240,6 @@
             <span class="label-text">Tags (optional)</span>
           </label>
           <TagPicker
-            {tags}
             {selectedTagIds}
             placeholder="Select tags to organize this transaction..."
             on:change={handleTagChange}

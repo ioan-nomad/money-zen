@@ -351,7 +351,6 @@
           </div>
         </div>
         <TagPicker
-          {tags}
           selectedTagIds={filters.tagIds}
           placeholder="Select tags to filter by..."
           on:change={handleTagChange}
