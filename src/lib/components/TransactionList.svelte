@@ -217,27 +217,6 @@
     showBulkTagEditor = true;
   }
 
-  async function handleBulkTagUpdate(tagsToAdd: string[], tagsToRemove: string[]) {
-    try {
-      const idsArray = Array.from(selectedTransactionIds);
-      const updatedCount = await transactionStore.bulkUpdateTags(
-        idsArray,
-        tagsToAdd,
-        tagsToRemove
-      );
-
-      showBulkTagEditor = false;
-      selectedTransactionIds = new Set();
-      selectAll = false;
-
-      // Store automatically reloads transactions, no need to dispatch
-
-      console.log(`Successfully updated tags for ${updatedCount} transactions`);
-    } catch (err) {
-      error = String(err);
-      console.error('Bulk tag update failed:', err);
-    }
-  }
 </script>
 
 <div class="space-y-4">
@@ -364,9 +343,7 @@
 <!-- Bulk Tag Editor Modal -->
 {#if showBulkTagEditor}
   <BulkTagEditorModal
-    transactionCount={selectedTransactionIds.size}
-    tags={tags}
-    onUpdate={handleBulkTagUpdate}
-    on:close={() => showBulkTagEditor = false}
+    selectedTransactionIds={selectedTransactionIds}
+    on:close={() => { showBulkTagEditor = false; selectedTransactionIds = new Set(); selectAll = false; }}
   />
 {/if}

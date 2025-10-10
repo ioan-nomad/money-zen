@@ -1,28 +1,17 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { tagStore } from '../../ui/stores/tagStore';
-  import { transactionStore } from '../../ui/stores/transactionStore';
-  import type { Tag } from '../../core/entities/Tag';
+  import type { Tag } from '../database';
 
-  export let selectedTransactionIds: Set<string>;
+  export let transactionCount: number;
+  export let tags: Tag[] = [];
+  export let onUpdate: (tagsToAdd: string[], tagsToRemove: string[]) => Promise<void>;
 
   const dispatch = createEventDispatcher();
 
-  // Store subscriptions
-  let tags: Tag[] = [];
-  tagStore.subscribe(value => tags = value);
-
-  // Initialize tags on component mount
-  tagStore.load();
-
-  // Component state
   let selectedTagsToAdd: Set<string> = new Set();
   let selectedTagsToRemove: Set<string> = new Set();
   let isSubmitting = false;
   let error = '';
-
-  // Reactive computed values
-  $: transactionCount = selectedTransactionIds.size;
 
   function toggleTagAdd(tagId: string) {
     const newSet = new Set(selectedTagsToAdd);
@@ -60,9 +49,7 @@
     error = '';
 
     try {
-      const transactionIds = Array.from(selectedTransactionIds);
-      await transactionStore.bulkUpdateTags(
-        transactionIds,
+      await onUpdate(
         Array.from(selectedTagsToAdd),
         Array.from(selectedTagsToRemove)
       );
