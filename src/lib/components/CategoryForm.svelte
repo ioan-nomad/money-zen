@@ -144,11 +144,11 @@
         required
       />
       {#if nameError}
-        <label class="label">
+        <label for="name-input" class="label">
           <span class="label-text-alt text-error">{nameError}</span>
         </label>
       {/if}
-      <label class="label">
+      <label for="name-input" class="label">
         <span class="label-text-alt">{name.length}/50 characters</span>
       </label>
     </div>
@@ -169,7 +169,7 @@
         <option value="expense">💸 Expense</option>
         <option value="income">💰 Income</option>
       </select>
-      <label class="label">
+      <label for="name-input" class="label">
         <span class="label-text-alt">
           {categoryType === 'income' ? 'Money coming in' : 'Money going out'}
         </span>
@@ -178,7 +178,7 @@
 
     <!-- Icon Picker -->
     <div class="form-control">
-      <label class="label">
+      <label for="name-input" class="label">
         <span class="label-text font-medium">Category Icon</span>
         <span class="label-text-alt text-error">*</span>
       </label>
@@ -189,7 +189,7 @@
 
     <!-- Color Picker -->
     <div class="form-control">
-      <label class="label">
+      <label for="name-input" class="label">
         <span class="label-text font-medium">Category Color</span>
         <span class="label-text-alt text-error">*</span>
       </label>
@@ -200,7 +200,7 @@
 
     <!-- Preview Section -->
     <div class="form-control">
-      <label class="label">
+      <label for="name-input" class="label">
         <span class="label-text font-medium">Preview</span>
       </label>
       <div class="p-4 bg-base-200 rounded-lg">

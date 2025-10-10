@@ -1,3 +1,4 @@
+import { notificationStore } from './notificationStore';
 // tagStore.ts - State management pentru Tags
 import { writable } from 'svelte/store';
 import { tagRepository } from '../../core/repositories/TagRepository';
@@ -15,7 +16,7 @@ function createTagStore() {
         set(tags);
       } catch (error) {
         console.error('Failed to load tags:', error);
-        // notificationStore.error('Failed to load tags');
+        notificationStore.error('Failed to load tags');
       }
     },
 
@@ -25,7 +26,7 @@ function createTagStore() {
         return tags;
       } catch (error) {
         console.error('Failed to load transaction tags:', error);
-        // notificationStore.error('Failed to load transaction tags');
+        notificationStore.error('Failed to load transaction tags');
         return [];
       }
     },
@@ -34,11 +35,11 @@ function createTagStore() {
       try {
         const newTag = await tagRepository.create(tag);
         update(tags => [...tags, newTag]);
-        // notificationStore.success('Tag created');
+        notificationStore.success('Tag created');
         return newTag;
       } catch (error) {
         console.error('Failed to create tag:', error);
-        // notificationStore.error('Failed to create tag');
+        notificationStore.error('Failed to create tag');
         throw error;
       }
     },
@@ -49,11 +50,11 @@ function createTagStore() {
         update(tags =>
           tags.map(t => t.id === id ? updated : t)
         );
-        // notificationStore.success('Tag updated');
+        notificationStore.success('Tag updated');
         return updated;
       } catch (error) {
         console.error('Failed to update tag:', error);
-        // notificationStore.error('Failed to update tag');
+        notificationStore.error('Failed to update tag');
         throw error;
       }
     },
@@ -62,10 +63,10 @@ function createTagStore() {
       try {
         await tagRepository.delete(id);
         update(tags => tags.filter(t => t.id !== id));
-        // notificationStore.success('Tag deleted');
+        notificationStore.success('Tag deleted');
       } catch (error) {
         console.error('Failed to delete tag:', error);
-        // notificationStore.error('Failed to delete tag');
+        notificationStore.error('Failed to delete tag');
         throw error;
       }
     },
@@ -73,10 +74,10 @@ function createTagStore() {
     async addToTransaction(transactionId: string, tagIds: string[]) {
       try {
         await tagRepository.addToTransaction(transactionId, tagIds);
-        // notificationStore.success('Tags added to transaction');
+        notificationStore.success('Tags added to transaction');
       } catch (error) {
         console.error('Failed to add tags to transaction:', error);
-        // notificationStore.error('Failed to add tags');
+        notificationStore.error('Failed to add tags');
         throw error;
       }
     },
@@ -84,10 +85,10 @@ function createTagStore() {
     async removeFromTransaction(transactionId: string, tagIds: string[]) {
       try {
         await tagRepository.removeFromTransaction(transactionId, tagIds);
-        // notificationStore.success('Tags removed from transaction');
+        notificationStore.success('Tags removed from transaction');
       } catch (error) {
         console.error('Failed to remove tags from transaction:', error);
-        // notificationStore.error('Failed to remove tags');
+        notificationStore.error('Failed to remove tags');
         throw error;
       }
     }

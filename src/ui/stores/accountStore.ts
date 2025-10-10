@@ -1,3 +1,4 @@
+import { notificationStore } from './notificationStore';
 // accountStore.ts - EXEMPLU pentru Sonnet
 import { writable } from 'svelte/store';
 import { accountRepository } from '../../core/repositories/AccountRepository';
@@ -15,7 +16,7 @@ function createAccountStore() {
         set(accounts);
       } catch (error) {
         console.error('Failed to load accounts:', error);
-        // notificationStore.error('Failed to load accounts');
+        notificationStore.error('Failed to load accounts');
       }
     },
     
@@ -23,11 +24,11 @@ function createAccountStore() {
       try {
         const newAccount = await accountRepository.create(account);
         update(accounts => [...accounts, newAccount]);
-        // notificationStore.success('Account created');
+        notificationStore.success('Account created');
         return newAccount;
       } catch (error) {
         console.error('Failed to create account:', error);
-        // notificationStore.error('Failed to create account');
+        notificationStore.error('Failed to create account');
         throw error;
       }
     },
@@ -36,10 +37,10 @@ function createAccountStore() {
       try {
         await accountRepository.delete(id);
         update(accounts => accounts.filter(a => a.id !== id));
-        // notificationStore.success('Account deleted');
+        notificationStore.success('Account deleted');
       } catch (error) {
         console.error('Failed to delete account:', error);
-        // notificationStore.error('Failed to delete account');
+        notificationStore.error('Failed to delete account');
         throw error;
       }
     }

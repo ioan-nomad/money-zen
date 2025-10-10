@@ -65,7 +65,13 @@
       "Bash(git fetch:*)",
       "Bash(rustc:*)",
       "Read(//c/Users/ciupe/Desktop/**)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(while read file)",
+      "Bash(grep:*)",
+      "Bash(done)",
+      "Bash(xargs:*)",
+      "Bash(for store in transactionStore categoryStore tagStore)",
+      "Bash(do echo \"  • Processing $store...\")"
     ],
     "deny": [],
     "ask": []

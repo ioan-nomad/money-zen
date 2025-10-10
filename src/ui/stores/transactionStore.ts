@@ -1,3 +1,4 @@
+import { notificationStore } from './notificationStore';
 // transactionStore.ts - State management pentru Transactions
 import { writable } from 'svelte/store';
 import { transactionRepository } from '../../core/repositories/TransactionRepository';
@@ -15,7 +16,7 @@ function createTransactionStore() {
         set(transactions);
       } catch (error) {
         console.error('Failed to load transactions:', error);
-        // notificationStore.error('Failed to load transactions');
+        notificationStore.error('Failed to load transactions');
       }
     },
 
@@ -25,7 +26,7 @@ function createTransactionStore() {
         set(transactions);
       } catch (error) {
         console.error('Failed to load transactions by account:', error);
-        // notificationStore.error('Failed to load transactions');
+        notificationStore.error('Failed to load transactions');
       }
     },
 
@@ -35,7 +36,7 @@ function createTransactionStore() {
         set(transactions);
       } catch (error) {
         console.error('Failed to load transactions by category:', error);
-        // notificationStore.error('Failed to load transactions');
+        notificationStore.error('Failed to load transactions');
       }
     },
 
@@ -45,7 +46,7 @@ function createTransactionStore() {
         set(transactions);
       } catch (error) {
         console.error('Failed to load transactions by date range:', error);
-        // notificationStore.error('Failed to load transactions');
+        notificationStore.error('Failed to load transactions');
       }
     },
 
@@ -53,11 +54,11 @@ function createTransactionStore() {
       try {
         const newTransaction = await transactionRepository.create(transaction);
         update(transactions => [newTransaction, ...transactions]);
-        // notificationStore.success('Transaction created');
+        notificationStore.success('Transaction created');
         return newTransaction;
       } catch (error) {
         console.error('Failed to create transaction:', error);
-        // notificationStore.error('Failed to create transaction');
+        notificationStore.error('Failed to create transaction');
         throw error;
       }
     },
@@ -68,11 +69,11 @@ function createTransactionStore() {
         update(transactions =>
           transactions.map(t => t.id === id ? updated : t)
         );
-        // notificationStore.success('Transaction updated');
+        notificationStore.success('Transaction updated');
         return updated;
       } catch (error) {
         console.error('Failed to update transaction:', error);
-        // notificationStore.error('Failed to update transaction');
+        notificationStore.error('Failed to update transaction');
         throw error;
       }
     },
@@ -81,10 +82,10 @@ function createTransactionStore() {
       try {
         await transactionRepository.delete(id);
         update(transactions => transactions.filter(t => t.id !== id));
-        // notificationStore.success('Transaction deleted');
+        notificationStore.success('Transaction deleted');
       } catch (error) {
         console.error('Failed to delete transaction:', error);
-        // notificationStore.error('Failed to delete transaction');
+        notificationStore.error('Failed to delete transaction');
         throw error;
       }
     },
@@ -95,11 +96,11 @@ function createTransactionStore() {
         update(transactions =>
           transactions.filter(t => !transactionIds.includes(t.id))
         );
-        // notificationStore.success(`${count} transactions deleted`);
+        notificationStore.success(`${count} transactions deleted`);
         return count;
       } catch (error) {
         console.error('Failed to delete transactions:', error);
-        // notificationStore.error('Failed to delete transactions');
+        notificationStore.error('Failed to delete transactions');
         throw error;
       }
     },
@@ -109,11 +110,11 @@ function createTransactionStore() {
         const count = await transactionRepository.bulkUpdateTags(transactionIds, tagsToAdd, tagsToRemove);
         // Reload transactions to reflect tag changes
         await this.load();
-        // notificationStore.success(`${count} transactions updated`);
+        notificationStore.success(`${count} transactions updated`);
         return count;
       } catch (error) {
         console.error('Failed to bulk update tags:', error);
-        // notificationStore.error('Failed to bulk update tags');
+        notificationStore.error('Failed to bulk update tags');
         throw error;
       }
     }

@@ -8,6 +8,8 @@
   import Import from './lib/Import.svelte'
   import Categories from './lib/Categories.svelte'
   import Tags from './lib/Tags.svelte'
+  import ToastContainer from './ui/components/common/ToastContainer.svelte'
+  import LoadingOverlay from './ui/components/common/LoadingOverlay.svelte'
 
   let greetMsg = ''
   let name = ''
@@ -141,3 +143,7 @@
     {/if}
   </div>
 </main>
+
+<!-- Global Components -->
+<ToastContainer />
+<LoadingOverlay />
