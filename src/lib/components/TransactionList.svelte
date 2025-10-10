@@ -222,9 +222,6 @@
 <div class="space-y-4">
   <!-- Advanced Filters -->
   <AdvancedFilters
-    accounts={accounts}
-    categories={categories}
-    tags={tags}
     on:filtersChanged={handleFiltersChanged}
   />
 

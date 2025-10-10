@@ -1,12 +1,11 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { accountStore } from '../../ui/stores/accountStore';
-  import { categoryStore } from '../../ui/stores/categoryStore';
-  import { tagStore } from '../../ui/stores/tagStore';
-  import type { Account } from '../../core/entities/Account';
-  import type { Category } from '../../core/entities/Category';
-  import type { Tag } from '../../core/entities/Tag';
+  import type { Account, Category, Tag } from '../database';
   import TagPicker from './TagPicker.svelte';
+
+  export let accounts: Account[] = [];
+  export let categories: Category[] = [];
+  export let tags: Tag[] = [];
 
   const dispatch = createEventDispatcher<{
     filtersChanged: {
@@ -26,19 +25,6 @@
     amountMin: number;
     amountMax: number;
   }
-
-  // Store subscriptions
-  let accounts: Account[] = [];
-  let categories: Category[] = [];
-  let tags: Tag[] = [];
-  accountStore.subscribe(value => accounts = value);
-  categoryStore.subscribe(value => categories = value);
-  tagStore.subscribe(value => tags = value);
-
-  // Initialize stores
-  accountStore.load();
-  categoryStore.load();
-  tagStore.load();
 
   // Filter state
   let isExpanded = false;
