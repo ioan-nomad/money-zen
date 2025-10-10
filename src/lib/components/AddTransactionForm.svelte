@@ -69,7 +69,6 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
       <GroupedAccountDropdown
-        accounts={$accountStore}
         selectedAccountId={selectedAccountId}
         onSelect={(id) => selectedAccountId = id}
       />
@@ -80,7 +79,6 @@
       </select>
 
       <GroupedCategoryDropdown
-        categories={filteredCategories}
         selectedId={selectedCategoryId}
         onChange={(id) => { selectedCategoryId = id; }}
       />

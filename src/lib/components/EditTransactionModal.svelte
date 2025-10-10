@@ -185,7 +185,6 @@
             <span class="label-text">Category</span>
           </label>
           <GroupedCategoryDropdown
-            categories={filteredCategories}
             selectedId={selectedCategoryId}
             onChange={(id) => selectedCategoryId = id}
           />
