@@ -1,12 +1,17 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { accountStore } from '../../ui/stores/accountStore';
-  import { categoryStore } from '../../ui/stores/categoryStore';
-  import { tagStore } from '../../ui/stores/tagStore';
-  import { transactionStore } from '../../ui/stores/transactionStore';
+  import type { Transaction, Account, Category, Tag } from '../database';
+  import { Database } from '../database';
   import TransactionItem from './TransactionItem.svelte';
   import AdvancedFilters, { type TransactionFilters } from './AdvancedFilters.svelte';
   import BulkTagEditorModal from './BulkTagEditorModal.svelte';
+  import { createEventDispatcher } from 'svelte';
+
+  const dispatch = createEventDispatcher();
+
+  export let transactions: Transaction[];
+  export let accounts: Account[] = [];
+  export let categories: Category[] = [];
+  export let tags: Tag[] = [];
 
   let currentFilters: TransactionFilters = {
     searchQuery: '',
@@ -20,21 +25,6 @@
     amountMin: 0,
     amountMax: 10000
   };
-
-  // Reactive store subscriptions
-  $: transactions = $transactionStore;
-  $: accounts = $accountStore;
-  $: categories = $categoryStore;
-  $: tags = $tagStore;
-
-  onMount(async () => {
-    await Promise.all([
-      transactionStore.load(),
-      accountStore.load(),
-      categoryStore.load(),
-      tagStore.load()
-    ]);
-  });
 
   // Bulk operations state
   let selectedTransactionIds: Set<string> = new Set();
@@ -61,7 +51,7 @@
 
     try {
       const tagPromises = transactions.map(async (transaction) => {
-        const transactionTags = await tagStore.loadByTransaction(transaction.id);
+        const transactionTags = await Database.getTransactionTags(transaction.id);
         return { transactionId: transaction.id, tagIds: transactionTags.map(tag => tag.id) };
       });
 
@@ -153,8 +143,10 @@
     const transactionId = event.detail;
 
     try {
-      await transactionStore.remove(transactionId);
-      // Store automatically updates the UI, no need to manually filter
+      await Database.deleteTransaction(transactionId);
+
+      // Remove from local array to update UI immediately
+      transactions = transactions.filter(t => t.id !== transactionId);
     } catch (error) {
       console.error('Failed to delete transaction:', error);
       alert('Eroare la ștergerea tranzacției. Încearcă din nou.');
@@ -193,13 +185,14 @@
   async function confirmBulkDelete() {
     try {
       const idsArray = Array.from(selectedTransactionIds);
-      const deletedCount = await transactionStore.removeMultiple(idsArray);
+      const deletedCount = await Database.deleteMultipleTransactions(idsArray);
 
       showBulkDeleteModal = false;
       selectedTransactionIds = new Set();
       selectAll = false;
 
-      // Store automatically updates the UI, no need to manually filter
+      // Remove deleted transactions from local array
+      transactions = transactions.filter(t => !idsArray.includes(t.id));
 
       console.log(`Successfully deleted ${deletedCount} transactions`);
     } catch (err) {
@@ -220,7 +213,7 @@
   async function handleBulkTagUpdate(tagsToAdd: string[], tagsToRemove: string[]) {
     try {
       const idsArray = Array.from(selectedTransactionIds);
-      const updatedCount = await transactionStore.bulkUpdateTags(
+      const updatedCount = await Database.bulkUpdateTransactionTags(
         idsArray,
         tagsToAdd,
         tagsToRemove
@@ -230,7 +223,8 @@
       selectedTransactionIds = new Set();
       selectAll = false;
 
-      // Store automatically reloads transactions, no need to dispatch
+      // Trigger parent to reload transactions
+      dispatch('refresh');
 
       console.log(`Successfully updated tags for ${updatedCount} transactions`);
     } catch (err) {
@@ -243,9 +237,9 @@
 <div class="space-y-4">
   <!-- Advanced Filters -->
   <AdvancedFilters
-    accounts={accounts}
-    categories={categories}
-    tags={tags}
+    {accounts}
+    {categories}
+    {tags}
     on:filtersChanged={handleFiltersChanged}
   />
 
@@ -317,10 +311,10 @@
         {:else}
           {#each filteredTransactions as transaction}
             <TransactionItem
-              transaction={transaction}
-              accounts={accounts}
-              categories={categories}
-              tags={tags}
+              {transaction}
+              {accounts}
+              {categories}
+              {tags}
               isSelected={selectedTransactionIds.has(transaction.id)}
               onToggleSelection={toggleSelection}
               on:delete={handleDelete}
@@ -365,7 +359,7 @@
 {#if showBulkTagEditor}
   <BulkTagEditorModal
     transactionCount={selectedTransactionIds.size}
-    tags={tags}
+    {tags}
     onUpdate={handleBulkTagUpdate}
     on:close={() => showBulkTagEditor = false}
   />
