@@ -67,38 +67,6 @@
     showEditModal = true;
   }
 
-  async function handleUpdate(
-    id: string,
-    accountId: string,
-    categoryId: string,
-    amount: number,
-    description: string,
-    transactionType: 'income' | 'expense',
-    date: string
-  ) {
-    try {
-      const updatedTransaction = await Database.updateTransaction(
-        id,
-        accountId,
-        categoryId,
-        amount,
-        description,
-        transactionType,
-        date
-      );
-
-      // Update local transaction data
-      transaction = updatedTransaction;
-
-      // Reload tags after update (EditTransactionModal handles tag updates)
-      await loadTransactionTags();
-
-      showEditModal = false;
-    } catch (error) {
-      console.error('Failed to update transaction:', error);
-      alert('Eroare la actualizarea tranzacției. Încearcă din nou.');
-    }
-  }
 </script>
 
 <div class="rounded-lg overflow-hidden transition-all duration-300">
@@ -209,11 +177,7 @@
 <!-- Edit Modal -->
 {#if showEditModal}
   <EditTransactionModal
-    {transaction}
-    {accounts}
-    {categories}
-    {tags}
-    onUpdate={handleUpdate}
+    transactionId={transaction.id}
     on:close={() => showEditModal = false}
   />
 {/if}
