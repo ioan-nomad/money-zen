@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Account } from '$lib/types';
-  import { accountStore } from '$lib/stores';
+  import { accountStore } from '../../ui/stores/accountStore';
   export let selectedAccountId: string;
   export let onSelect: (accountId: string) => void;
 

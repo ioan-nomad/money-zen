@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import type { Tag } from '$lib/types';
-  import { tagStore } from '$lib/stores';
+  import { tagStore } from '../../ui/stores/tagStore';
 
   export let selectedTagIds: string[] = [];
   export let disabled = false;

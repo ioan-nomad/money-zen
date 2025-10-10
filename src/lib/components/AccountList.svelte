@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Account } from '$lib/types';
-  import { accountStore } from '$lib/stores';
+  import { accountStore } from '../../ui/stores/accountStore';
   import AccountCard from './AccountCard.svelte';
   export let onEdit: (account: Account) => void;
   export let onDelete: (accountId: string) => void;

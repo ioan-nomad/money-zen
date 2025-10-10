@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Category } from '$lib/types';
-  import { categoryStore } from '$lib/stores';
+  import { categoryStore } from '../../ui/stores/categoryStore';
   import { onMount } from 'svelte';
   export let selectedId: string = '';
   export let onChange: (categoryId: string) => void;
