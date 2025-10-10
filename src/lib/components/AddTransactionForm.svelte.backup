@@ -1,60 +1,48 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { accountStore } from '../../ui/stores/accountStore';
-  import { categoryStore } from '../../ui/stores/categoryStore';
-  import { tagStore } from '../../ui/stores/tagStore';
-  import { transactionStore } from '../../ui/stores/transactionStore';
+  import type { Account, Category, Tag } from '../database';
   import GroupedCategoryDropdown from './GroupedCategoryDropdown.svelte';
   import GroupedAccountDropdown from './GroupedAccountDropdown.svelte';
   import TagPicker from './TagPicker.svelte';
 
-  let selectedAccountId = '';
+  export let accounts: Account[];
+  export let categories: Category[];
+  export let tags: Tag[];
+  export let onSubmit: (data: {
+    accountId: string;
+    categoryId: string;
+    amount: number;
+    description: string;
+    type: 'income' | 'expense';
+    tagIds: string[];
+  }) => void;
+
+  let selectedAccountId = accounts.length > 0 ? accounts[0].id : '';
   let selectedCategoryId = '';
   let transactionType: 'income' | 'expense' = 'expense';
   let amount = 0;
   let description = '';
   let selectedTagIds: string[] = [];
 
-  $: filteredCategories = $categoryStore.filter(c => c.category_type === transactionType);
-  $: {
-    if ($accountStore.length > 0 && !selectedAccountId) {
-      selectedAccountId = $accountStore[0].id;
-    }
-  }
+  $: filteredCategories = categories.filter(c => c.category_type === transactionType);
   $: {
     if (filteredCategories.length > 0 && !filteredCategories.find(c => c.id === selectedCategoryId)) {
       selectedCategoryId = filteredCategories[0].id;
     }
   }
 
-  onMount(async () => {
-    await Promise.all([
-      accountStore.load(),
-      categoryStore.load(),
-      tagStore.load()
-    ]);
-  });
-
-  async function handleSubmit() {
+  function handleSubmit() {
     if (selectedAccountId && selectedCategoryId && amount > 0) {
-      try {
-        await transactionStore.create({
-          account_id: selectedAccountId,
-          category_id: selectedCategoryId,
-          amount,
-          description,
-          transaction_type: transactionType,
-          tag_ids: selectedTagIds,
-          transaction_date: new Date().toISOString().split('T')[0]
-        });
-
-        // Reset form
-        amount = 0;
-        description = '';
-        selectedTagIds = [];
-      } catch (error) {
-        console.error('Failed to create transaction:', error);
-      }
+      onSubmit({
+        accountId: selectedAccountId,
+        categoryId: selectedCategoryId,
+        amount,
+        description,
+        type: transactionType,
+        tagIds: selectedTagIds
+      });
+      amount = 0;
+      description = '';
+      selectedTagIds = [];
     }
   }
 
@@ -69,7 +57,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
       <GroupedAccountDropdown
-        accounts={$accountStore}
+        accounts={accounts}
         selectedAccountId={selectedAccountId}
         onSelect={(id) => selectedAccountId = id}
       />
@@ -106,7 +94,7 @@
           <span class="label-text">Tags (optional)</span>
         </label>
         <TagPicker
-          tags={$tagStore}
+          {tags}
           {selectedTagIds}
           placeholder="Select tags to organize this transaction..."
           on:change={handleTagChange}
