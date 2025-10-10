@@ -1,7 +1,8 @@
 <script lang="ts">
-  import type { Category } from '$lib/types';
-  import { categoryStore } from '$lib/stores';
+  import type { Category } from '../database';
   import { onMount } from 'svelte';
+
+  export let categories: Category[] = [];
   export let selectedId: string = '';
   export let onChange: (categoryId: string) => void;
 
@@ -10,11 +11,11 @@
   let containerRef: HTMLDivElement;
 
   // Get selected category object
-  $: selectedCategory = $categoryStore.find(c => c.id === selectedId);
+  $: selectedCategory = categories.find(c => c.id === selectedId);
 
   // Group categories by type
-  $: incomeCategories = $categoryStore.filter(c => c.category_type === 'income');
-  $: expenseCategories = $categoryStore.filter(c => c.category_type === 'expense');
+  $: incomeCategories = categories.filter(c => c.category_type === 'income');
+  $: expenseCategories = categories.filter(c => c.category_type === 'expense');
 
   function toggleDropdown() {
     isOpen = !isOpen;

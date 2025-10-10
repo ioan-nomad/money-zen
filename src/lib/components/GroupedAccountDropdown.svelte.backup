@@ -1,11 +1,12 @@
 <script lang="ts">
-  import type { Account } from '$lib/types';
-  import { accountStore } from '$lib/stores';
+  import type { Account } from '$lib/database';
+
+  export let accounts: Account[];
   export let selectedAccountId: string;
   export let onSelect: (accountId: string) => void;
 
   // Group accounts by owner
-  $: groupedAccounts = $accountStore.reduce((groups, account) => {
+  $: groupedAccounts = accounts.reduce((groups, account) => {
     const owner = account.owner || 'Unknown';
     if (!groups[owner]) {
       groups[owner] = [];
