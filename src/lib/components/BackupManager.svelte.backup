@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { databaseRepository } from '$lib/repositories';
+  import { Database } from '../database';
   import { open } from '@tauri-apps/plugin-dialog';
 
   let loading = false;
@@ -14,7 +14,7 @@
     isError = false;
 
     try {
-      const result = await databaseRepository.backupDatabase();
+      const result = await Database.backupDatabase();
       message = result;
       isError = false;
     } catch (error) {
@@ -47,7 +47,7 @@
     isError = false;
 
     try {
-      const result = await databaseRepository.restoreDatabase(selectedBackupPath);
+      const result = await Database.restoreDatabase(selectedBackupPath);
       message = result + ' - Please restart the app to see changes.';
       isError = false;
     } catch (error) {
