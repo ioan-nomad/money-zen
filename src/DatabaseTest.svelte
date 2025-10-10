@@ -53,26 +53,6 @@
     }
   }
 
-  async function handleTransactionSubmit(data: {
-    accountId: string;
-    categoryId: string;
-    amount: number;
-    description: string;
-    type: 'income' | 'expense';
-  }) {
-    try {
-      await Database.createTransaction(
-        data.accountId,
-        data.categoryId,
-        data.amount,
-        data.description,
-        data.type
-      );
-      await loadData();
-    } catch (err) {
-      error = String(err);
-    }
-  }
 
 </script>
 
@@ -140,7 +120,7 @@
   </div>
 
   <!-- Add Transaction Section -->
-  <AddTransactionForm {accounts} {categories} onSubmit={handleTransactionSubmit} />
+  <AddTransactionForm />
 
   <!-- Transactions Section -->
   <div class="card bg-base-100 shadow-xl">

@@ -27,31 +27,6 @@
     }
   }
 
-  async function handleTransactionSubmit(data: {
-    accountId: string;
-    categoryId: string;
-    amount: number;
-    description: string;
-    type: 'income' | 'expense';
-    tagIds: string[];
-  }) {
-    try {
-      await transactionStore.create({
-        account_id: data.accountId,
-        category_id: data.categoryId,
-        amount: data.amount,
-        description: data.description,
-        transaction_type: data.type,
-        date: new Date().toISOString(),
-        tags: data.tagIds
-      });
-
-      // Reload accounts to update balances
-      await accountStore.load();
-    } catch (err) {
-      error = String(err);
-    }
-  }
 
   // Reactive subscriptions to stores
   $: accounts = $accountStore;
@@ -100,5 +75,5 @@
     </div>
   </div>
 
-  <AddTransactionForm {accounts} {categories} {tags} onSubmit={handleTransactionSubmit} />
+  <AddTransactionForm />
 </div>
