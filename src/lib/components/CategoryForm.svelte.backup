@@ -2,15 +2,16 @@
   import { createEventDispatcher } from 'svelte';
   import IconPicker from './IconPicker.svelte';
   import ColorPicker from './ColorPicker.svelte';
-  import type { Tag } from '$lib/types';
+  import type { Category } from '../database';
 
   // Component props
-  export let tag: Tag | null = null; // null for create, Tag for edit
+  export let category: Category | null = null; // null for create, Category for edit
   export let isSubmitting = false;
 
   // Form fields
   let name = '';
-  let selectedIcon = '🏷️';
+  let categoryType: 'income' | 'expense' = 'expense';
+  let selectedIcon = '💰';
   let selectedColor = '#3B82F6';
 
   // Validation states
@@ -21,17 +22,19 @@
   const dispatch = createEventDispatcher<{
     submit: {
       name: string;
+      categoryType: 'income' | 'expense';
       icon: string;
       color: string;
     };
     cancel: void;
   }>();
 
-  // Initialize form with tag data if editing
-  $: if (tag) {
-    name = tag.name;
-    selectedIcon = tag.icon;
-    selectedColor = tag.color;
+  // Initialize form with category data if editing
+  $: if (category) {
+    name = category.name;
+    categoryType = category.category_type;
+    selectedIcon = category.icon;
+    selectedColor = category.color;
   }
 
   // Form validation
@@ -41,19 +44,19 @@
     // Reset errors
     nameError = '';
 
-    // Name validation (2-30 chars as per requirements)
+    // Name validation
     if (formTouched && !name.trim()) {
-      nameError = 'Tag name is required';
+      nameError = 'Category name is required';
     } else if (formTouched && name.trim().length < 2) {
-      nameError = 'Tag name must be at least 2 characters';
-    } else if (formTouched && name.trim().length > 30) {
-      nameError = 'Tag name must be less than 30 characters';
+      nameError = 'Category name must be at least 2 characters';
+    } else if (formTouched && name.trim().length > 50) {
+      nameError = 'Category name must be less than 50 characters';
     }
   }
 
   // Check if form is valid
   $: isFormValid = name.trim().length >= 2 &&
-                   name.trim().length <= 30 &&
+                   name.trim().length <= 50 &&
                    selectedIcon.trim() !== '' &&
                    selectedColor.trim() !== '';
 
@@ -68,6 +71,7 @@
 
     dispatch('submit', {
       name: name.trim(),
+      categoryType,
       icon: selectedIcon,
       color: selectedColor
     });
@@ -98,37 +102,45 @@
   // Reset form to initial state
   export function resetForm() {
     name = '';
-    selectedIcon = '🏷️';
+    categoryType = 'expense';
+    selectedIcon = '💰';
     selectedColor = '#3B82F6';
     nameError = '';
     formTouched = false;
   }
 
   // Get form title based on mode
-  $: formTitle = tag ? 'Edit Tag' : 'Create New Tag';
-  $: submitButtonText = tag ? 'Update Tag' : 'Create Tag';
+  $: formTitle = category ? 'Edit Category' : 'Create New Category';
+  $: submitButtonText = category ? 'Update Category' : 'Create Category';
+
+  // Set default color based on category type
+  $: if (!category && categoryType === 'income') {
+    selectedColor = '#10B981'; // Green for income
+  } else if (!category && categoryType === 'expense') {
+    selectedColor = '#EF4444'; // Red for expense
+  }
 </script>
 
-<div class="tag-form">
+<div class="category-form">
   <h3 class="text-xl font-bold mb-6">{formTitle}</h3>
 
   <form on:submit|preventDefault={handleSubmit} class="space-y-6">
-    <!-- Tag Name -->
+    <!-- Category Name -->
     <div class="form-control">
-      <label class="label" for="tag-name">
-        <span class="label-text font-medium">Tag Name</span>
+      <label class="label" for="category-name">
+        <span class="label-text font-medium">Category Name</span>
         <span class="label-text-alt text-error">*</span>
       </label>
       <input
-        id="tag-name"
+        id="category-name"
         type="text"
         class="input input-bordered"
         class:input-error={nameError}
         bind:value={name}
         on:input={handleNameInput}
-        placeholder="Enter tag name"
+        placeholder="Enter category name"
         disabled={isSubmitting}
-        maxlength="30"
+        maxlength="50"
         required
       />
       {#if nameError}
@@ -137,14 +149,37 @@
         </label>
       {/if}
       <label class="label">
-        <span class="label-text-alt">{name.length}/30 characters</span>
+        <span class="label-text-alt">{name.length}/50 characters</span>
+      </label>
+    </div>
+
+    <!-- Category Type -->
+    <div class="form-control">
+      <label class="label" for="category-type">
+        <span class="label-text font-medium">Category Type</span>
+        <span class="label-text-alt text-error">*</span>
+      </label>
+      <select
+        id="category-type"
+        class="select select-bordered"
+        bind:value={categoryType}
+        disabled={isSubmitting}
+        required
+      >
+        <option value="expense">💸 Expense</option>
+        <option value="income">💰 Income</option>
+      </select>
+      <label class="label">
+        <span class="label-text-alt">
+          {categoryType === 'income' ? 'Money coming in' : 'Money going out'}
+        </span>
       </label>
     </div>
 
     <!-- Icon Picker -->
     <div class="form-control">
       <label class="label">
-        <span class="label-text font-medium">Tag Icon</span>
+        <span class="label-text font-medium">Category Icon</span>
         <span class="label-text-alt text-error">*</span>
       </label>
       <div class="p-4 border border-base-300 rounded-lg bg-base-50">
@@ -155,7 +190,7 @@
     <!-- Color Picker -->
     <div class="form-control">
       <label class="label">
-        <span class="label-text font-medium">Tag Color</span>
+        <span class="label-text font-medium">Category Color</span>
         <span class="label-text-alt text-error">*</span>
       </label>
       <div class="p-4 border border-base-300 rounded-lg bg-base-50">
@@ -163,22 +198,24 @@
       </div>
     </div>
 
-    <!-- Live Preview Section -->
+    <!-- Preview Section -->
     <div class="form-control">
       <label class="label">
         <span class="label-text font-medium">Preview</span>
       </label>
       <div class="p-4 bg-base-200 rounded-lg">
-        <div class="flex items-center gap-3">
-          <div class="text-2xl">{selectedIcon}</div>
-          <div class="flex items-center gap-2">
-            <span class="font-semibold text-base-content">
-              {name || 'Tag Name'}
-            </span>
-            <div class="w-4 h-4 rounded-full" style="background-color: {selectedColor}"></div>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="text-2xl">{selectedIcon}</div>
+            <div>
+              <span class="font-semibold text-base-content">
+                {name || 'Category Name'}
+              </span>
+              <div class="w-4 h-4 rounded-full inline-block ml-2" style="background-color: {selectedColor}"></div>
+            </div>
           </div>
-          <div class="badge badge-outline" style="border-color: {selectedColor}; color: {selectedColor}">
-            tag
+          <div class="badge" class:badge-success={categoryType === 'income'} class:badge-error={categoryType === 'expense'}>
+            {categoryType}
           </div>
         </div>
       </div>
@@ -201,7 +238,7 @@
       >
         {#if isSubmitting}
           <span class="loading loading-spinner loading-sm"></span>
-          {tag ? 'Updating...' : 'Creating...'}
+          {category ? 'Updating...' : 'Creating...'}
         {:else}
           {submitButtonText}
         {/if}
@@ -211,7 +248,7 @@
 </div>
 
 <style>
-  .tag-form {
+  .category-form {
     width: 100%;
     max-width: 500px;
   }
@@ -226,8 +263,8 @@
   }
 
   /* Ensure proper spacing within pickers */
-  .tag-form :global(.icon-picker),
-  .tag-form :global(.color-picker) {
+  .category-form :global(.icon-picker),
+  .category-form :global(.color-picker) {
     margin: 0;
   }
 

@@ -2,7 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import IconPicker from './IconPicker.svelte';
   import ColorPicker from './ColorPicker.svelte';
-  import type { Category } from '../database';
+  import type { Category } from '$lib/types';
 
   // Component props
   export let category: Category | null = null; // null for create, Category for edit
