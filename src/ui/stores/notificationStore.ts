@@ -9,7 +9,7 @@ export interface Notification {
 
 function createNotificationStore() {
   const { subscribe, update } = writable<Notification[]>([]);
-
+  
   const addNotification = (
     type: Notification['type'],
     message: string,
@@ -17,29 +17,29 @@ function createNotificationStore() {
   ) => {
     const id = Date.now().toString();
     const notification: Notification = { id, type, message, duration };
-
+    
     update(n => [...n, notification]);
-
+    
     if (duration > 0) {
       setTimeout(() => {
         update(n => n.filter(notif => notif.id !== id));
       }, duration);
     }
-
+    
     return id;
   };
-
+  
   return {
     subscribe,
-    success: (msg: string, duration?: number) =>
+    success: (msg: string, duration?: number) => 
       addNotification('success', msg, duration),
-    error: (msg: string, duration?: number) =>
+    error: (msg: string, duration?: number) => 
       addNotification('error', msg, duration || 10000),
-    warning: (msg: string, duration?: number) =>
+    warning: (msg: string, duration?: number) => 
       addNotification('warning', msg, duration),
-    info: (msg: string, duration?: number) =>
+    info: (msg: string, duration?: number) => 
       addNotification('info', msg, duration),
-    remove: (id: string) =>
+    remove: (id: string) => 
       update(n => n.filter(notif => notif.id !== id))
   };
 }

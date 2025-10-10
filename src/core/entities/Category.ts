@@ -5,4 +5,5 @@ export interface Category {
   icon: string;
   category_type: 'income' | 'expense';
   created_at: string;
+  updated_at: string;
 }

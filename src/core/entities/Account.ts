@@ -6,5 +6,5 @@ export interface Account {
   currency: string;
   created_at: string;
   updated_at: string;
-  owner: string;
+  owner?: string;
 }

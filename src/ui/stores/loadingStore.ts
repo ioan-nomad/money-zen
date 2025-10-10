@@ -12,10 +12,10 @@ function createLoadingStore() {
     loadingText: undefined,
     operations: new Set()
   });
-
+  
   return {
     subscribe,
-
+    
     start(operation: string, text?: string) {
       update(state => {
         state.operations.add(operation);
@@ -26,7 +26,7 @@ function createLoadingStore() {
         };
       });
     },
-
+    
     stop(operation: string) {
       update(state => {
         state.operations.delete(operation);
@@ -38,7 +38,7 @@ function createLoadingStore() {
         };
       });
     },
-
+    
     reset() {
       update(() => ({
         isLoading: false,

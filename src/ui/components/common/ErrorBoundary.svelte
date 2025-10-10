@@ -1,43 +1,43 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { notificationStore } from '../../stores/notificationStore';
-
+  
   export let resetKeys: any[] = [];
   export let fallback: string = 'Ceva nu a mers bine. Reîncarcă pagina.';
-
+  
   let hasError = false;
   let errorMessage = '';
-
+  
   const resetError = () => {
     hasError = false;
     errorMessage = '';
   };
-
+  
   const handleError = (error: Error) => {
     console.error('ErrorBoundary caught:', error);
     hasError = true;
     errorMessage = error.message || fallback;
     notificationStore.error(errorMessage);
   };
-
+  
   onMount(() => {
     const handleUnhandledError = (event: ErrorEvent) => {
       handleError(new Error(event.message));
     };
-
+    
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
       handleError(new Error(event.reason));
     };
-
+    
     window.addEventListener('error', handleUnhandledError);
     window.addEventListener('unhandledrejection', handleUnhandledRejection);
-
+    
     return () => {
       window.removeEventListener('error', handleUnhandledError);
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
     };
   });
-
+  
   $: if (resetKeys.length) resetError();
 </script>
 
