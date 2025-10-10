@@ -1,12 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Database, type Transaction, type Account, type Category, type Tag } from './database';
+  import { transactionStore } from '../ui/stores/transactionStore';
+  import { accountStore } from '../ui/stores/accountStore';
+  import { categoryStore } from '../ui/stores/categoryStore';
+  import { tagStore } from '../ui/stores/tagStore';
   import TransactionList from './components/TransactionList.svelte';
 
-  let transactions: Transaction[] = [];
-  let accounts: Account[] = [];
-  let categories: Category[] = [];
-  let tags: Tag[] = [];
   let error = '';
 
   onMount(async () => {
@@ -15,14 +14,22 @@
 
   async function loadData() {
     try {
-      transactions = await Database.getTransactions();
-      accounts = await Database.getAccounts();
-      categories = await Database.getCategories();
-      tags = await Database.getTags();
+      await Promise.all([
+        transactionStore.load(),
+        accountStore.load(),
+        categoryStore.load(),
+        tagStore.load()
+      ]);
     } catch (err) {
       error = String(err);
     }
   }
+
+  // Reactive subscriptions to stores
+  $: transactions = $transactionStore;
+  $: accounts = $accountStore;
+  $: categories = $categoryStore;
+  $: tags = $tagStore;
 </script>
 
 <div class="max-w-6xl mx-auto p-6">
