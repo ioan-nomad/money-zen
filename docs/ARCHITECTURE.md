@@ -628,3 +628,112 @@ money-zen/
 ## PHASE 8: NEXT STEPS (To Be Decided)
 
 Three strategic options available - see PROJECT-STATUS-MASTER.md for details.
+
+---
+
+## PHASE 8A: CLEAN ARCHITECTURE REFACTORING - 40% COMPLETE
+
+**Status:** Infrastructure complete, migration in progress (October 10, 2025)
+**Latest Commits:** 5b12968 → 98613d2 (6 architecture commits)
+**Goal:** Migrate from monolithic database.ts to Repository Pattern + Centralized State Management
+
+### 8A.1 Infrastructure Layer ✅ COMPLETE
+
+**Entities Created (src/core/entities/):**
+- Account.ts - Account type definitions
+- Transaction.ts - Transaction type definitions
+- Category.ts - Category type definitions
+- Tag.ts - Tag type definitions
+- index.ts - Central exports
+
+**Repositories Created (src/core/repositories/):**
+- AccountRepository.ts - Account CRUD operations
+- TransactionRepository.ts - Transaction CRUD + bulk operations
+- CategoryRepository.ts - Category CRUD operations
+- TagRepository.ts - Tag CRUD + transaction associations
+- Pattern: invoke() → Repository → Tauri Command
+
+**Stores Created (src/ui/stores/):**
+- accountStore.ts - Account state management
+- transactionStore.ts - Transaction state management
+- categoryStore.ts - Category state management
+- tagStore.ts - Tag state management
+- loadingStore.ts - Global loading states
+- notificationStore.ts - Toast notifications
+
+**Utilities (src/lib/):**
+- api/TauriApi.ts - Centralized invoke wrapper with loading/error handling
+
+### 8A.2 Migration Status ❌ IN PROGRESS (0% Complete)
+
+**Pages to Migrate (0/7):**
+- [ ] Dashboard.svelte → use accountStore, transactionStore
+- [ ] Transactions.svelte → use transactionStore, filters
+- [ ] Accounts.svelte → use accountStore
+- [ ] Categories.svelte → use categoryStore
+- [ ] Tags.svelte → use tagStore
+- [ ] Analytics.svelte → use stores for data
+- [ ] Import.svelte → use stores for import
+
+**Components to Migrate (0/22):**
+- [ ] AddTransactionForm.svelte → use stores
+- [ ] TransactionList.svelte → use stores
+- [ ] EditTransactionModal.svelte → use stores
+- [ ] TransactionItem.svelte → display only
+- [ ] AccountCard.svelte → display only
+- [ ] AccountList.svelte → use accountStore
+- [ ] ... (16+ additional components)
+
+### 8A.3 Old Code Still Active ⚠️
+
+**Monolithic Files Still in Use:**
+- src/lib/database.ts - 40+ direct invoke() calls
+- All pages still use Database.method() directly
+- No components use new Repository Pattern yet
+
+**Migration Strategy:**
+1. Migrate Dashboard first (uses most stores)
+2. Migrate other pages one by one
+3. Migrate components as pages are updated
+4. Delete old database.ts when all pages migrated
+5. Final testing and cleanup
+
+### 8A.4 Architecture Benefits
+
+**Current Pattern (OLD):**
+```typescript
+// Component → Direct invoke()
+const data = await invoke('get_accounts');
+```
+
+**New Pattern (CLEAN):**
+```typescript
+// Component → Store → Repository → Tauri Command
+await accountStore.load();
+const data = $accountStore;
+```
+
+**Advantages:**
+- ✅ Centralized state management
+- ✅ Automatic loading states
+- ✅ Consistent error handling
+- ✅ Single source of truth
+- ✅ Easier testing
+- ✅ Better code organization
+
+### 8A.5 Next Steps
+
+**Week 2: Complete Page Migration**
+- Migrate all 7 pages to use stores
+- Update all 22 components
+- Remove database.ts monolith
+- Full testing of migrated code
+
+**Week 3: Polish & Deploy**
+- Add animations
+- Enhance notifications
+- Production build
+- Create installers
+
+**Estimated Time Remaining:** 2 weeks
+**Completion Target:** October 24, 2025

@@ -403,3 +403,80 @@
 
 **Last Updated:** October 9, 2025
 **Next Review:** When Phase 8 decision is made
+
+## PHASE 8A: CLEAN ARCHITECTURE REFACTORING ⏳ IN PROGRESS (40%)
+**Started:** October 10, 2025 (with Opus 4.1)
+**Current Status:** Infrastructure complete, migration pending
+**Commits:** 5b12968, 1ab67ba, 448aff3, 8d43bfe, 02421e0, 98613d2
+
+### Infrastructure ✅ COMPLETE (100%)
+**Completed Tasks:**
+- ✅ Create all entity type definitions (Account, Transaction, Category, Tag)
+- ✅ Create AccountRepository with full CRUD
+- ✅ Create TransactionRepository with CRUD + bulk operations
+- ✅ Create CategoryRepository with full CRUD
+- ✅ Create TagRepository with CRUD + associations
+- ✅ Create accountStore with reactive state management
+- ✅ Create transactionStore with reactive state management
+- ✅ Create categoryStore with reactive state management
+- ✅ Create tagStore with reactive state management
+- ✅ Create loadingStore for global loading states
+- ✅ Create notificationStore for toast messages
+- ✅ Create TauriApi wrapper with automatic error handling
+- ✅ Push all infrastructure to GitHub
+
+**Infrastructure Stats:**
+- 4 Entities defined
+- 4 Repositories created
+- 6 Stores created
+- 1 API wrapper
+- ~800 lines of infrastructure code
+- 6 Git commits
+
+### Migration Tasks ❌ PENDING (0%)
+**Pages to Migrate (0/7):**
+- [ ] Dashboard.svelte
+- [ ] Transactions.svelte
+- [ ] Accounts.svelte
+- [ ] Categories.svelte
+- [ ] Tags.svelte
+- [ ] Analytics.svelte
+- [ ] Import.svelte
+
+**Components to Migrate (0/22):**
+- [ ] AddTransactionForm.svelte
+- [ ] TransactionList.svelte
+- [ ] EditTransactionModal.svelte
+- [ ] TransactionItem.svelte
+- [ ] AccountCard.svelte
+- [ ] AccountList.svelte
+- [ ] BulkTagEditorModal.svelte
+- [ ] TagPicker.svelte
+- [ ] TagForm.svelte
+- [ ] AdvancedFilters.svelte
+- [ ] CategoryForm.svelte
+- [ ] ColorPicker.svelte
+- [ ] IconPicker.svelte
+- [ ] GroupedCategoryDropdown.svelte
+- [ ] GroupedAccountDropdown.svelte
+- [ ] CategoryBadge.svelte
+- [ ] BackupManager.svelte
+- [ ] (5+ additional components)
+
+**Old Code Cleanup:**
+- [ ] Remove src/lib/database.ts after migration
+- [ ] Update all imports to use new stores
+- [ ] Remove unused utility functions
+- [ ] Clean up deprecated patterns
+
+### Testing & Validation ❌ PENDING
+- [ ] Test all migrated pages work correctly
+- [ ] Verify loading states appear properly
+- [ ] Verify error handling works
+- [ ] Test all CRUD operations through stores
+- [ ] Verify data consistency
+- [ ] Performance testing
+- [ ] Edge case testing
+
+**Estimated Time:** 1-2 weeks
+**Next Milestone:** Dashboard migration
