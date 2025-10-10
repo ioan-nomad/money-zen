@@ -1,16 +1,14 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
-  import { accountStore } from '../../ui/stores/accountStore';
-  import { categoryStore } from '../../ui/stores/categoryStore';
-  import { tagStore } from '../../ui/stores/tagStore';
-  import type { Transaction } from '../../core/entities/Transaction';
-  import type { Account } from '../../core/entities/Account';
-  import type { Category } from '../../core/entities/Category';
-  import type { Tag } from '../../core/entities/Tag';
+  import type { Transaction, Account, Category, Tag } from '../database';
   import { formatCurrency, formatDate } from '../utils';
   import EditTransactionModal from './EditTransactionModal.svelte';
+  import { Database } from '../database';
 
   export let transaction: Transaction;
+  export let accounts: Account[] = [];
+  export let categories: Category[] = [];
+  export let tags: Tag[] = [];
 
   // Bulk selection props
   export let isSelected: boolean = false;
@@ -18,23 +16,12 @@
 
   const dispatch = createEventDispatcher();
 
-  // Store subscriptions
-  let accounts: Account[] = [];
-  let categories: Category[] = [];
-  accountStore.subscribe(value => accounts = value);
-  categoryStore.subscribe(value => categories = value);
-
-  // Initialize stores on component mount
-  accountStore.load();
-  categoryStore.load();
-
-  // Component state
   let expanded = false;
   let showDeleteConfirm = false;
   let showEditModal = false;
   let transactionTags: Tag[] = [];
 
-  // Helper functions (now use store-subscribed data)
+  // Helper functions
   $: account = accounts.find(a => a.id === transaction.account_id);
   $: category = categories.find(c => c.id === transaction.category_id);
 
@@ -44,7 +31,7 @@
 
   async function loadTransactionTags() {
     try {
-      transactionTags = await tagStore.loadByTransaction(transaction.id);
+      transactionTags = await Database.getTransactionTags(transaction.id);
     } catch (error) {
       console.error('Failed to load transaction tags:', error);
       transactionTags = [];

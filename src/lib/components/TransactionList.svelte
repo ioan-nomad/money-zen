@@ -297,9 +297,6 @@
           {#each filteredTransactions as transaction}
             <TransactionItem
               transaction={transaction}
-              accounts={accounts}
-              categories={categories}
-              tags={tags}
               isSelected={selectedTransactionIds.has(transaction.id)}
               onToggleSelection={toggleSelection}
               on:delete={handleDelete}
