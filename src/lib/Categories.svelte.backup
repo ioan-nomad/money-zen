@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { categoryStore } from '../ui/stores/categoryStore';
-  import type { Category } from '../core/entities/Category';
+  import { Database, type Category } from './database';
   import CategoryForm from './components/CategoryForm.svelte';
 
+  let categories: Category[] = [];
   let error = '';
 
   // Create modal state
@@ -21,13 +21,17 @@
   let deleteCategoryId = '';
   let deleteCategoryName = '';
 
+  // Grouped categories
+  $: incomeCategories = categories.filter(cat => cat.category_type === 'income');
+  $: expenseCategories = categories.filter(cat => cat.category_type === 'expense');
+
   onMount(async () => {
     await loadCategories();
   });
 
   async function loadCategories() {
     try {
-      await categoryStore.load();
+      categories = await Database.getCategories();
     } catch (err) {
       error = String(err);
     }
@@ -40,12 +44,12 @@
   async function handleCreateSubmit(event: CustomEvent) {
     isSubmitting = true;
     try {
-      await categoryStore.create({
-        name: event.detail.name,
-        icon: event.detail.icon,
-        category_type: event.detail.categoryType,
-        color: event.detail.color
-      });
+      await Database.createCategory(
+        event.detail.name,
+        event.detail.icon,
+        event.detail.categoryType,
+        event.detail.color
+      );
       showCreateModal = false;
       await loadCategories();
     } catch (err) {
@@ -64,12 +68,13 @@
     if (!editCategory) return;
     isSubmitting = true;
     try {
-      await categoryStore.updateCategory(editCategory.id, {
-        name: event.detail.name,
-        icon: event.detail.icon,
-        category_type: event.detail.categoryType,
-        color: event.detail.color
-      });
+      await Database.updateCategory(
+        editCategory.id,
+        event.detail.name,
+        event.detail.icon,
+        event.detail.categoryType,
+        event.detail.color
+      );
       showEditModal = false;
       editCategory = null;
       await loadCategories();
@@ -88,7 +93,7 @@
 
   async function confirmDelete() {
     try {
-      await categoryStore.remove(deleteCategoryId);
+      await Database.deleteCategory(deleteCategoryId);
       showDeleteModal = false;
       await loadCategories();
     } catch (err) {
@@ -96,10 +101,6 @@
     }
   }
 
-  // Reactive subscriptions
-  $: categories = $categoryStore;
-  $: incomeCategories = categories.filter(cat => cat.category_type === 'income');
-  $: expenseCategories = categories.filter(cat => cat.category_type === 'expense');
 </script>
 
 <div class="max-w-4xl mx-auto p-6">

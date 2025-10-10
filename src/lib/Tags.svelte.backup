@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { tagStore } from '../ui/stores/tagStore';
-  import type { Tag } from '../core/entities/Tag';
+  import { Database, type Tag } from './database';
   import TagForm from './components/TagForm.svelte';
 
+  let tags: Tag[] = [];
   let error = '';
 
   // Create modal state
@@ -22,13 +22,16 @@
   let deleteTagName = '';
   let deleteTagTransactionCount = 0;
 
+  // Sort tags alphabetically
+  $: sortedTags = tags.sort((a, b) => a.name.localeCompare(b.name));
+
   onMount(async () => {
     await loadTags();
   });
 
   async function loadTags() {
     try {
-      await tagStore.load();
+      tags = await Database.getTags();
     } catch (err) {
       error = String(err);
     }
@@ -41,11 +44,11 @@
   async function handleCreateSubmit(event: CustomEvent) {
     isSubmitting = true;
     try {
-      await tagStore.create({
-        name: event.detail.name,
-        color: event.detail.color,
-        icon: event.detail.icon
-      });
+      await Database.createTag(
+        event.detail.name,
+        event.detail.color,
+        event.detail.icon
+      );
       showCreateModal = false;
       await loadTags();
     } catch (err) {
@@ -64,11 +67,12 @@
     if (!editTag) return;
     isSubmitting = true;
     try {
-      await tagStore.updateTag(editTag.id, {
-        name: event.detail.name,
-        color: event.detail.color,
-        icon: event.detail.icon
-      });
+      await Database.updateTag(
+        editTag.id,
+        event.detail.name,
+        event.detail.color,
+        event.detail.icon
+      );
       showEditModal = false;
       editTag = null;
       await loadTags();
@@ -82,7 +86,7 @@
   async function handleDelete(tagId: string, tagName: string) {
     // Get transaction count for this tag to show warning
     try {
-      const transactions = await tagStore.getTransactionsByTag(tagId);
+      const transactions = await Database.getTransactionsByTag(tagId);
       deleteTagTransactionCount = transactions.length;
     } catch (err) {
       deleteTagTransactionCount = 0;
@@ -95,17 +99,13 @@
 
   async function confirmDelete() {
     try {
-      await tagStore.remove(deleteTagId);
+      await Database.deleteTag(deleteTagId);
       showDeleteModal = false;
       await loadTags();
     } catch (err) {
       error = String(err);
     }
   }
-
-  // Reactive subscriptions
-  $: tags = $tagStore;
-  $: sortedTags = tags.sort((a, b) => a.name.localeCompare(b.name));
 </script>
 
 <div class="max-w-4xl mx-auto p-6">
@@ -217,3 +217,4 @@
     </div>
   </div>
 {/if}
+

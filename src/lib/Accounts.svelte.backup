@@ -1,18 +1,18 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { accountStore } from '../ui/stores/accountStore';
-  import type { Account } from '../core/entities/Account';
+  import { Database, type Account } from './database';
   import AccountList from './components/AccountList.svelte';
 
+  let accounts: Account[] = [];
   let error = '';
-
+  
   // Edit modal state
   let showEditModal = false;
   let editAccount: Account | null = null;
   let editName = '';
   let editType = '';
   let editCurrency = '';
-
+  
   // Delete confirmation state
   let showDeleteModal = false;
   let deleteAccountId = '';
@@ -23,7 +23,7 @@
 
   async function loadAccounts() {
     try {
-      await accountStore.load();
+      accounts = await Database.getAccounts();
     } catch (err) {
       error = String(err);
     }
@@ -39,13 +39,9 @@
 
   async function saveEdit() {
     if (!editAccount || !editName) return;
-
+    
     try {
-      await accountStore.updateAccount(editAccount.id, {
-        name: editName,
-        account_type: editType,
-        currency: editCurrency
-      });
+      await Database.updateAccount(editAccount.id, editName, editType, editCurrency);
       showEditModal = false;
       await loadAccounts();
     } catch (err) {
@@ -60,16 +56,13 @@
 
   async function confirmDelete() {
     try {
-      await accountStore.remove(deleteAccountId);
+      await Database.deleteAccount(deleteAccountId);
       showDeleteModal = false;
       await loadAccounts();
     } catch (err) {
       error = String(err);
     }
   }
-
-  // Reactive subscription
-  $: accounts = $accountStore;
 </script>
 
 <div class="max-w-4xl mx-auto p-6">
@@ -86,7 +79,7 @@
     <div class="modal modal-open">
       <div class="modal-box">
         <h3 class="font-bold text-lg mb-4">Edit Account</h3>
-
+        
         <div class="form-control mb-3">
           <label class="label" for="edit-name"><span class="label-text">Account Name</span></label>
           <input id="edit-name" type="text" class="input input-bordered" bind:value={editName} />
@@ -121,7 +114,7 @@
       <div class="modal-box">
         <h3 class="font-bold text-lg mb-4">Delete Account</h3>
         <p class="mb-4">Are you sure? This will also delete all transactions for this account.</p>
-
+        
         <div class="modal-action">
           <button class="btn" on:click={() => showDeleteModal = false}>Cancel</button>
           <button class="btn btn-error" on:click={confirmDelete}>Delete</button>
