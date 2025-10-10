@@ -1,13 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { accountStore } from '../ui/stores/accountStore';
-  import { transactionStore } from '../ui/stores/transactionStore';
-  import { categoryStore } from '../ui/stores/categoryStore';
-  import { tagStore } from '../ui/stores/tagStore';
+  import { Database, type Account, type Transaction, type Tag } from './database';
   import AccountCard from './components/AccountCard.svelte';
   import TransactionItem from './components/TransactionItem.svelte';
   import AddTransactionForm from './components/AddTransactionForm.svelte';
 
+  let accounts: Account[] = [];
+  let transactions: Transaction[] = [];
+  let categories = [];
+  let tags: Tag[] = [];
   let error = '';
 
   onMount(async () => {
@@ -16,12 +17,10 @@
 
   async function loadData() {
     try {
-      await Promise.all([
-        accountStore.load(),
-        transactionStore.load(),
-        categoryStore.load(),
-        tagStore.load()
-      ]);
+      accounts = await Database.getAccounts();
+      transactions = await Database.getTransactions();
+      categories = await Database.getCategories();
+      tags = await Database.getTags();
     } catch (err) {
       error = String(err);
     }
@@ -36,30 +35,25 @@
     tagIds: string[];
   }) {
     try {
-      await transactionStore.create({
-        account_id: data.accountId,
-        category_id: data.categoryId,
-        amount: data.amount,
-        description: data.description,
-        transaction_type: data.type,
-        date: new Date().toISOString(),
-        tags: data.tagIds
-      });
+      const transaction = await Database.createTransaction(
+        data.accountId,
+        data.categoryId,
+        data.amount,
+        data.description,
+        data.type
+      );
 
-      // Reload accounts to update balances
-      await accountStore.load();
+      // Add tags to the transaction if any were selected
+      if (data.tagIds.length > 0) {
+        await Database.addTagsToTransaction(transaction.id, data.tagIds);
+      }
+
+      await loadData();
     } catch (err) {
       error = String(err);
     }
   }
 
-  // Reactive subscriptions to stores
-  $: accounts = $accountStore;
-  $: transactions = $transactionStore;
-  $: categories = $categoryStore;
-  $: tags = $tagStore;
-
-  // Computed values
   $: recentTransactions = transactions.slice(0, 5);
   $: totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
 </script>
