@@ -38,17 +38,21 @@
     try {
       // Load existing data first
       seedingProgress = 'Încărcăm conturile...';
-      await accountStore.fetchAccounts();
+      await accountStore.load();
 
       seedingProgress = 'Încărcăm categoriile...';
-      await categoryStore.fetchCategories();
+      await categoryStore.load();
 
       seedingProgress = 'Încărcăm tag-urile...';
-      await tagStore.fetchTags();
+      await tagStore.load();
 
-      const accounts = accountStore.getAll();
-      const categories = categoryStore.getAll();
-      const tags = tagStore.getAll();
+      // Get current data from stores
+      let accounts: Account[] = [];
+      let categories: Category[] = [];
+      let tags: Tag[] = [];
+      accountStore.subscribe(value => accounts = value)();
+      categoryStore.subscribe(value => categories = value)();
+      tagStore.subscribe(value => tags = value)();
 
       if (accounts.length === 0) {
         notificationStore.error('Nu există conturi! Creează mai întâi un cont.');
@@ -113,8 +117,8 @@
       notificationStore.success(`${successCount} tranzacții de test adăugate cu succes!`);
 
       // Refresh stores to show new data
-      await transactionStore.fetchTransactions();
-      await accountStore.fetchAccounts(); // This will update balances
+      await transactionStore.load();
+      await accountStore.load(); // This will update balances
 
     } catch (error) {
       console.error('Error seeding data:', error);
@@ -139,14 +143,16 @@
     seedingProgress = 'Ștergem toate tranzacțiile...';
 
     try {
-      await transactionStore.fetchTransactions();
-      const transactions = transactionStore.getAll();
+      await transactionStore.load();
+      // Get transactions from store subscription
+      let transactions: Transaction[] = [];
+      transactionStore.subscribe(value => transactions = value)();
 
       let deletedCount = 0;
       for (let i = 0; i < transactions.length; i++) {
         seedingProgress = `Ștergem tranzacția ${i + 1}/${transactions.length}`;
         try {
-          await transactionStore.delete(transactions[i].id);
+          await transactionStore.remove(transactions[i].id);
           deletedCount++;
           await new Promise(resolve => setTimeout(resolve, 50));
         } catch (error) {
@@ -158,8 +164,8 @@
       notificationStore.success(`${deletedCount} tranzacții șterse cu succes!`);
 
       // Refresh stores
-      await transactionStore.fetchTransactions();
-      await accountStore.fetchAccounts();
+      await transactionStore.load();
+      await accountStore.load();
 
     } catch (error) {
       console.error('Error clearing data:', error);

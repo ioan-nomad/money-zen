@@ -34,8 +34,12 @@
   const pdfParser = PDFParserService.getInstance();
 
   onMount(async () => {
-    accounts = await accountStore.getAll();
-    categories = await categoryStore.getAll();
+    await accountStore.load();
+    await categoryStore.load();
+
+    // Get data from stores
+    accountStore.subscribe(value => accounts = value)();
+    categoryStore.subscribe(value => categories = value)();
   });
 
   function handleFileSelect(event: Event) {
