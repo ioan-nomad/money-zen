@@ -71,7 +71,10 @@
       "Bash(done)",
       "Bash(xargs:*)",
       "Bash(for store in transactionStore categoryStore tagStore)",
-      "Bash(do echo \"  • Processing $store...\")"
+      "Bash(do echo \"  • Processing $store...\")",
+      "Bash(then echo \"✅ Database exists!\")",
+      "Bash(else echo \"❌ Database not found\")",
+      "Bash(pnpm run dev:*)"
     ],
     "deny": [],
     "ask": []

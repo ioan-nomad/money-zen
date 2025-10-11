@@ -38,15 +38,21 @@
   async function handleSubmit() {
     if (selectedAccountId && selectedCategoryId && amount > 0) {
       try {
-        await transactionStore.create({
+        const transactionData = {
           account_id: selectedAccountId,
           category_id: selectedCategoryId,
           amount,
           description,
           transaction_type: transactionType,
-          tag_ids: selectedTagIds,
-          transaction_date: new Date().toISOString().split('T')[0]
-        });
+          date: new Date().toISOString().split('T')[0],
+          tags: selectedTagIds
+        };
+
+        console.log('Creating transaction with data:', transactionData);
+
+        const result = await transactionStore.create(transactionData);
+
+        console.log('Transaction created successfully:', result);
 
         // Reset form
         amount = 0;
@@ -54,7 +60,15 @@
         selectedTagIds = [];
       } catch (error) {
         console.error('Failed to create transaction:', error);
+        alert('Error creating transaction: ' + error.message);
       }
+    } else {
+      console.warn('Form validation failed:', {
+        selectedAccountId,
+        selectedCategoryId,
+        amount,
+        validationPassed: selectedAccountId && selectedCategoryId && amount > 0
+      });
     }
   }
 

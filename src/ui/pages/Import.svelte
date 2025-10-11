@@ -7,9 +7,11 @@
   import { open } from '@tauri-apps/plugin-dialog';
   import { readFile } from '@tauri-apps/plugin-fs';
   import { invoke } from '@tauri-apps/api/core';
+  import PDFBankImporter from './components/PDFImport/PDFBankImporter.svelte';
 
   let error = '';
   let successMessage = '';
+  let currentTab: 'excel' | 'pdf' = 'excel';
 
   // File import state
   let fileName = '';
@@ -202,16 +204,36 @@
     </div>
   {/if}
 
-  <!-- File Selection -->
-  <div class="card bg-base-100 shadow-xl">
-    <div class="card-body">
-      <h2 class="card-title">Select Excel File</h2>
-      <p>Import transactions from .xlsx or .xls files</p>
-      <button class="btn btn-primary" on:click={selectFile}>
-        📁 Select Excel File
-      </button>
-    </div>
+  <!-- Import Method Tabs -->
+  <div class="tabs tabs-boxed justify-center mb-6">
+    <button
+      class="tab tab-lg"
+      class:tab-active={currentTab === 'excel'}
+      on:click={() => currentTab = 'excel'}
+    >
+      📊 Excel/CSV
+    </button>
+    <button
+      class="tab tab-lg"
+      class:tab-active={currentTab === 'pdf'}
+      on:click={() => currentTab = 'pdf'}
+    >
+      📄 PDF Extract Bancar
+    </button>
   </div>
+
+  {#if currentTab === 'excel'}
+    <!-- Excel Import Section -->
+    <!-- File Selection -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title">Select Excel File</h2>
+        <p>Import transactions from .xlsx or .xls files</p>
+        <button class="btn btn-primary" on:click={selectFile}>
+          📁 Select Excel File
+        </button>
+      </div>
+    </div>
 
   <!-- File Info -->
   {#if fileName}
@@ -320,5 +342,10 @@
         </div>
       </div>
     </div>
+  {/if}
+
+  {:else if currentTab === 'pdf'}
+    <!-- PDF Import Section -->
+    <PDFBankImporter />
   {/if}
 </div>

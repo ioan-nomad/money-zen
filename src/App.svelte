@@ -1,19 +1,20 @@
 <script lang="ts">
   import { invoke } from '@tauri-apps/api/core'
   import DatabaseTest from './DatabaseTest.svelte'
-  import Dashboard from './lib/Dashboard.svelte'
-  import Transactions from './lib/Transactions.svelte'
-  import Accounts from './lib/Accounts.svelte'
-  import Analytics from './lib/Analytics.svelte'
-  import Import from './lib/Import.svelte'
-  import Categories from './lib/Categories.svelte'
-  import Tags from './lib/Tags.svelte'
+  import Dashboard from './ui/pages/Dashboard.svelte'
+  import Transactions from './ui/pages/Transactions.svelte'
+  import Accounts from './ui/pages/Accounts.svelte'
+  import Analytics from './ui/pages/Analytics.svelte'
+  import Import from './ui/pages/Import.svelte'
+  import Categories from './ui/pages/Categories.svelte'
+  import Tags from './ui/pages/Tags.svelte'
+  import DataSeeder from './lib/components/DataSeeder.svelte'
   import ToastContainer from './ui/components/common/ToastContainer.svelte'
   import LoadingOverlay from './ui/components/common/LoadingOverlay.svelte'
 
   let greetMsg = ''
   let name = ''
-  let currentView: 'welcome' | 'dashboard' | 'transactions' | 'accounts' | 'categories' | 'tags' | 'analytics' | 'import' | 'test' = 'dashboard'
+  let currentView: 'welcome' | 'dashboard' | 'transactions' | 'accounts' | 'categories' | 'tags' | 'analytics' | 'import' | 'test' | 'seeder' = 'dashboard'
 
   async function greet() {
     greetMsg = await invoke('greet', { name })
@@ -90,6 +91,13 @@
       >
         Database Test
       </button>
+      <button
+        class="tab tab-lg"
+        class:tab-active={currentView === 'seeder'}
+        on:click={() => currentView = 'seeder'}
+      >
+        🌱 Test Data
+      </button>
     </div>
 
     {#if currentView === 'dashboard'}
@@ -140,6 +148,8 @@
       </div>
     {:else if currentView === 'test'}
       <DatabaseTest />
+    {:else if currentView === 'seeder'}
+      <DataSeeder />
     {/if}
   </div>
 </main>

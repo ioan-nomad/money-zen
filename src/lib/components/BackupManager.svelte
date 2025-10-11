@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Database } from '../database';
+  import { invoke } from '@tauri-apps/api/core';
   import { open } from '@tauri-apps/plugin-dialog';
 
   let loading = false;
@@ -14,7 +14,7 @@
     isError = false;
 
     try {
-      const result = await Database.backupDatabase();
+      const result = await invoke<string>('backup_database');
       message = result;
       isError = false;
     } catch (error) {
@@ -47,7 +47,7 @@
     isError = false;
 
     try {
-      const result = await Database.restoreDatabase(selectedBackupPath);
+      const result = await invoke<string>('restore_database', { backupPath: selectedBackupPath });
       message = result + ' - Please restart the app to see changes.';
       isError = false;
     } catch (error) {
