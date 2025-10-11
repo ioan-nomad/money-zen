@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { accountStore } from '../ui/stores/accountStore';
+  import { accountStore } from '../stores/accountStore';
   import type { Account } from '../core/entities/Account';
-  import AccountList from './components/AccountList.svelte';
+  import AccountList from '../../lib/components/AccountList.svelte';
 
   let error = '';
 

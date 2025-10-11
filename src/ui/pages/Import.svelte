@@ -1,13 +1,13 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { transactionStore } from '../ui/stores/transactionStore';
-  import { accountStore } from '../ui/stores/accountStore';
-  import { categoryStore } from '../ui/stores/categoryStore';
+  import { transactionStore } from '../stores/transactionStore';
+  import { accountStore } from '../stores/accountStore';
+  import { categoryStore } from '../stores/categoryStore';
   import * as XLSX from 'xlsx';
   import { open } from '@tauri-apps/plugin-dialog';
   import { readFile } from '@tauri-apps/plugin-fs';
   import { invoke } from '@tauri-apps/api/core';
-  import PDFBankImporter from './components/PDFImport/PDFBankImporter.svelte';
+  import PDFBankImporter from '../../lib/components/PDFImport/PDFBankImporter.svelte';
 
   let error = '';
   let successMessage = '';

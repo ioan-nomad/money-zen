@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { tagStore } from '../ui/stores/tagStore';
+  import { tagStore } from '../stores/tagStore';
   import type { Tag } from '../core/entities/Tag';
-  import TagForm from './components/TagForm.svelte';
+  import TagForm from '../../lib/components/TagForm.svelte';
 
   let error = '';
 

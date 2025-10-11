@@ -1,15 +1,15 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import { Chart, registerables } from 'chart.js';
-  import { transactionStore } from '../ui/stores/transactionStore';
-  import { accountStore } from '../ui/stores/accountStore';
-  import { categoryStore } from '../ui/stores/categoryStore';
+  import { transactionStore } from '../stores/transactionStore';
+  import { accountStore } from '../stores/accountStore';
+  import { categoryStore } from '../stores/categoryStore';
   import jsPDF from 'jspdf';
   import autoTable from 'jspdf-autotable';
   import * as XLSX from 'xlsx';
   import { save } from '@tauri-apps/plugin-dialog';
   import { writeFile } from '@tauri-apps/plugin-fs';
-  import AddTransactionForm from './components/AddTransactionForm.svelte';
+  import AddTransactionForm from '../../lib/components/AddTransactionForm.svelte';
 
   Chart.register(...registerables);
 

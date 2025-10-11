@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { categoryStore } from '../ui/stores/categoryStore';
+  import { categoryStore } from '../stores/categoryStore';
   import type { Category } from '../core/entities/Category';
-  import CategoryForm from './components/CategoryForm.svelte';
+  import CategoryForm from '../../lib/components/CategoryForm.svelte';
 
   let error = '';
 

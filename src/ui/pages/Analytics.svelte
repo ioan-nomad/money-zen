@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { transactionStore } from '../ui/stores/transactionStore';
-  import { accountStore } from '../ui/stores/accountStore';
-  import { categoryStore } from '../ui/stores/categoryStore';
-  import { tagStore } from '../ui/stores/tagStore';
+  import { transactionStore } from '../stores/transactionStore';
+  import { accountStore } from '../stores/accountStore';
+  import { categoryStore } from '../stores/categoryStore';
+  import { tagStore } from '../stores/tagStore';
 
   let error = '';
 
